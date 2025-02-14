@@ -21,8 +21,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -76,7 +84,7 @@
   */
 
 /* Private macro -------------------------------------------------------------*/
-/* Exported variables ---------------------------------------------------------*/
+/* Exported variables --------------------------------------------------------*/
 /** @defgroup HAL_Exported_Variables HAL Exported Variables
   * @{
   */
@@ -94,7 +102,7 @@ uint32_t uwTickFreq = HAL_TICK_FREQ_DEFAULT;  /* 1KHz */
   * @{
   */
 
-/** @addtogroup HAL_Exported_Functions_Group1
+/** @addtogroup HAL_Exported_Functions_Group1 HAL Initialization and Configuration functions
  *  @brief    HAL Initialization and Configuration functions
  *
 @verbatim
@@ -175,17 +183,17 @@ HAL_StatusTypeDef HAL_Init(void)
 HAL_StatusTypeDef HAL_DeInit(void)
 {
   /* Reset of all peripherals */
-//  __HAL_RCC_APB1_FORCE_RESET();
-//  __HAL_RCC_APB1_RELEASE_RESET();
+  __HAL_RCC_APB1_FORCE_RESET();
+  __HAL_RCC_APB1_RELEASE_RESET();
 
-//  __HAL_RCC_APB2_FORCE_RESET();
-//  __HAL_RCC_APB2_RELEASE_RESET();
+  __HAL_RCC_APB2_FORCE_RESET();
+  __HAL_RCC_APB2_RELEASE_RESET();
 
-//  __HAL_RCC_AHB_FORCE_RESET();
-//  __HAL_RCC_AHB_RELEASE_RESET();
+  __HAL_RCC_AHB_FORCE_RESET();
+  __HAL_RCC_AHB_RELEASE_RESET();
 
-//  __HAL_RCC_IOP_FORCE_RESET();
-//  __HAL_RCC_IOP_RELEASE_RESET();
+  __HAL_RCC_IOP_FORCE_RESET();
+  __HAL_RCC_IOP_RELEASE_RESET();
 
   /* De-Init the low level hardware */
   HAL_MspDeInit();
@@ -270,7 +278,7 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   * @}
   */
 
-/** @addtogroup HAL_Exported_Functions_Group2
+/** @addtogroup HAL_Exported_Functions_Group2 HAL Control functions
  *  @brief    HAL Control functions
  *
 @verbatim
@@ -472,7 +480,7 @@ uint32_t HAL_GetUIDw2(void)
   * @}
   */
 
-/** @addtogroup HAL_Exported_Functions_Group3
+/** @addtogroup HAL_Exported_Functions_Group3 HAL Debug functions
  *  @brief    HAL Debug functions
  *
 @verbatim
@@ -503,6 +511,199 @@ void HAL_DBGMCU_DisableDBGMCUStopMode(void)
 {
   CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STOP);
 }
+
+/**
+  * @}
+  */
+
+/** @addtogroup HAL_Exported_Functions_Group4 SYSCFG configuration functions
+ *  @brief    SYSCFG configuration functions
+ *
+@verbatim
+ ===============================================================================
+                      ##### HAL SYSCFG configuration functions #####
+ ===============================================================================
+    [..]  This section provides functions allowing to:
+      (+) Set/Get memory mapping at address 0x00000000
+      (+) Set/Get TIM1 CH1 Input Source
+      (+) Enable/Disable I2C Fast mode plus
+      (+) Set TIM1 ETR Source
+      (+) Enable/Disable GPIO Noise Filter
+   (*) Feature not available on all devices
+
+@endverbatim
+  * @{
+  */
+
+/**
+  * @brief  Set memory mapping at address 0x00000000
+  * @param  Memory This parameter can be one of the following values:
+  *         @arg @ref SYSCFG_BOOT_MAINFLASH
+  *         @arg @ref SYSCFG_BOOT_SYSTEMFLASH
+  *         @arg @ref SYSCFG_BOOT_SRAM
+  * @retval None
+  */
+void HAL_SYSCFG_SetRemapMemory(uint32_t Memory)
+{
+  MODIFY_REG(SYSCFG->CFGR1, SYSCFG_CFGR1_MEM_MODE, Memory);
+}
+
+/**
+  * @brief  Get memory mapping at address 0x00000000
+  * @retval Returned value can be one of the following values:
+  *         @arg @ref SYSCFG_BOOT_MAINFLASH
+  *         @arg @ref SYSCFG_BOOT_SYSTEMFLASH
+  *         @arg @ref SYSCFG_BOOT_SRAM
+  */
+uint32_t HAL_SYSCFG_GetRemapMemory(void)
+{
+  return (uint32_t)(READ_BIT(SYSCFG->CFGR1, SYSCFG_CFGR1_MEM_MODE));
+}
+
+/**
+  * @brief  Set TIM1 CH1 Input Source.
+  * @param  Source TIM1 CH1 Input Source.
+  *          This parameter can be one of the following values:
+  *            @arg SYSCFG_CH1_SRC_TIM1_GPIO
+  *            @arg SYSCFG_CH1_SRC_TIM1_COMP1
+  *            @arg SYSCFG_CH1_SRC_TIM1_COMP2
+  * @retval None
+  */
+void HAL_SYSCFG_SetTIM1CH1Source(uint32_t Source)
+{
+  MODIFY_REG(SYSCFG->CFGR1, SYSCFG_CFGR1_TIM1_IC1_SRC, Source);  
+}
+
+/**
+  * @brief  Get TIM1 CH1 Input Source.
+  * @retval Returned value can be one of the following values:
+  *         @arg @ref SYSCFG_CH1_SRC_TIM1_GPIO
+  *         @arg @ref SYSCFG_CH1_SRC_TIM1_COMP1
+  *         @arg @ref SYSCFG_CH1_SRC_TIM1_COMP2
+  */
+uint32_t HAL_SYSCFG_GetTIM1CH1Source(void)
+{
+  return (uint32_t)(READ_BIT(SYSCFG->CFGR1, SYSCFG_CFGR1_TIM1_IC1_SRC));
+}
+
+/**
+  * @brief  Enable I2C Fast mode plus
+  * @note   Depending on devices and packages, some IOs may not be available.
+  *         Refer to device datasheet for IOs availability.
+  * @param  I2CFastModePlus This parameter can be a combination of the following values:
+  *         @arg @ref SYSCFG_I2C_FMP_PA2
+  *         @arg @ref SYSCFG_I2C_FMP_PB3
+  *         @arg @ref SYSCFG_I2C_FMP_PB4
+  *         @arg @ref SYSCFG_I2C_FMP_PB6
+  * @retval None
+  */
+void HAL_SYSCFG_EnableI2CFastModePlus(uint32_t I2CFastModePlus)
+{
+  SET_BIT(SYSCFG->CFGR1, I2CFastModePlus);
+}
+
+/**
+  * @brief  Disable I2C Fast mode plus
+  * @note   Depending on devices and packages, some IOs may not be available.
+  *         Refer to device datasheet for IOs availability.
+  * @param  I2CFastModePlus This parameter can be a combination of the following values:
+  *         @arg @ref SYSCFG_I2C_FMP_PA2
+  *         @arg @ref SYSCFG_I2C_FMP_PB3
+  *         @arg @ref SYSCFG_I2C_FMP_PB4
+  *         @arg @ref SYSCFG_I2C_FMP_PB6
+  * @retval None
+  */
+void HAL_SYSCFG_DisableI2CFastModePlus(uint32_t I2CFastModePlus)
+{
+  CLEAR_BIT(SYSCFG->CFGR1, I2CFastModePlus);
+}
+
+#if defined(SYSCFG_CFGR2_ETR_SRC_TIM1)
+/**
+  * @brief  Set TIM1 ETR Source
+  * @param  ETRSource TIM1 ETR Source.
+  *          This parameter can be one of the following values:
+  *            @arg SYSCFG_ETR_SRC_TIM1_GPIO:  GPIO for TIM1 ETR Source
+  *            @arg SYSCFG_ETR_SRC_TIM1_COMP1: COMP1 for TIM1 ETR Source
+  *            @arg SYSCFG_ETR_SRC_TIM1_COMP2: COMP2 for TIM1 ETR Source
+  *            @arg SYSCFG_ETR_SRC_TIM1_ADC:   ADC for TIM1 ETR Source
+  * @retval None
+  */
+void HAL_SYSCFG_TIM1ETRSource(uint32_t ETRSource)
+{
+  MODIFY_REG(SYSCFG->CFGR2, SYSCFG_CFGR2_ETR_SRC_TIM1, ETRSource);  
+}
+#endif
+
+#if (defined(SYSCFG_GPIO_ENS_PA_ENS) || defined(SYSCFG_GPIO_ENS_PB_ENS) || defined(SYSCFG_GPIO_ENS_PC_ENS))
+/**
+  * @brief  Enable GPIO Noise Filter
+  * @note   Depending on devices and packages, some IOs may not be available.
+  *         Refer to device datasheet for IOs availability.
+  * @param  GPIOx where x can be (A..C) to select the GPIO peripheral for PY32M010 family
+  * @param  GPIO_Pin specifies the pin to be Noise Filter
+  *         This parameter can be any combination of GPIO_Pin_x where x can be (0..7).
+  * @retval None
+  */
+void HAL_SYSCFG_EnableGPIONoiseFilter(GPIO_TypeDef *GPIOx,uint16_t GPIO_Pin)
+{
+  /* Check the parameters */
+  assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+  if(GPIOx == GPIOA)
+  {    
+    SET_BIT(SYSCFG->GPIO_ENS, GPIO_Pin);
+  }
+  else if(GPIOx == GPIOB)
+  {
+    SET_BIT(SYSCFG->GPIO_ENS, (GPIO_Pin << 8U));
+  }
+  else if(GPIOx == GPIOC)
+  {
+    SET_BIT(SYSCFG->GPIO_ENS, (GPIO_Pin << 16U));
+  }
+  else
+  {
+    
+  }
+}
+
+/**
+  * @brief  Disable GPIO Noise Filter
+  * @note   Depending on devices and packages, some IOs may not be available.
+  *         Refer to device datasheet for IOs availability.
+  * @param  GPIOx where x can be (A..C) to select the GPIO peripheral for PY32M010 family
+  * @param  GPIO_Pin specifies the pin to be Noise Filter
+  *         This parameter can be any combination of GPIO_Pin_x where x can be (0..7).
+  * @retval None
+  */
+void HAL_SYSCFG_DisableGPIONoiseFilter(GPIO_TypeDef *GPIOx,uint16_t GPIO_Pin)
+{
+  /* Check the parameters */
+  assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+  if(GPIOx == GPIOA)
+  {    
+    CLEAR_BIT(SYSCFG->GPIO_ENS, GPIO_Pin);
+  }
+  else if(GPIOx == GPIOB)
+  {
+    CLEAR_BIT(SYSCFG->GPIO_ENS, (GPIO_Pin << 8U));
+  }
+  else if(GPIOx == GPIOC)
+  {
+    CLEAR_BIT(SYSCFG->GPIO_ENS, (GPIO_Pin << 16U));
+  }
+  else
+  {
+    
+  }
+}
+#endif
+
+/**
+  * @}
+  */
 
 /**
   * @}

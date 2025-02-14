@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -45,41 +53,41 @@ static void APP_TimerInit(void);
 uint32_t data=0;
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 开SYSCFG和PWR时钟 */
+  /* Enable SYSCFG clock and PWR clock */
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_SYSCFG);
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
-  
-  /* 配置系统时钟 */
+
+  /* Configure Systemclock */
   APP_SystemClockConfig();
 
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-  /* 初始化按键BUTTON */
+  /* Initialize BUTTON */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
 
-  /* 初始化调试串口(printf使用) */
+  /* Initialize USART(for printf use) */
   BSP_USART_Config();
 
-  /* 配置ADC参数 */
+  /* Configure ADC parameters */
   APP_AdcConfig();
-  
-  /* ADC校准 */
+
+  /* ADC automatic self-calibration */
   APP_AdcCalibrate();
-  
-  /* ADC使能 */
+
+  /* Enable ADC */
   APP_AdcEnable();
 
-  /* 开始ADC转换(如果是软件触发则直接开始转换) */
+  /* Start ADC conversion (if it is software triggered then start conversion directly) */
   LL_ADC_REG_StartConversion(ADC1);
 
-  /* TIM1初始化 */
+  /* Initialize TIM1 */
   APP_TimerInit();
   while (1)
   {
@@ -87,74 +95,74 @@ int main(void)
 }
 
 /**
-  * @brief  ADC配置函数.
-  * @param  无
-  * @retval 无
+  * @brief  Configure ADC parameters
+  * @param  None
+  * @retval None
   */
 static void APP_AdcConfig(void)
 {
-  /* 使能ADC1时钟 */
+  /* Enable ADC1 clock */
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_ADC1);
-  
-  /* 使能GPIOA时钟 */
+
+  /* Enable GPIOA clock */
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
 
-  /* 配置PA7为模拟模式 */
+  /* Configure PA7 pin in analog input mode */
   LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_7, LL_GPIO_MODE_ANALOG);
 
-  /* 设置ADC时钟 */
-  LL_ADC_SetClock(ADC1, LL_ADC_CLOCK_SYNC_PCLK_DIV8);
+  /* Set ADC clock to pclk/4 */
+  LL_ADC_SetClock(ADC1, LL_ADC_CLOCK_SYNC_PCLK_DIV4);
 
-  /* 设置12位分辨率 */
+  /* Set ADC resolution to 12 bit */
   LL_ADC_SetResolution(ADC1, LL_ADC_RESOLUTION_12B);
 
-  /* 设置数据右对齐 */
+  /* ADC conversion data alignment: right aligned */
   LL_ADC_SetDataAlignment(ADC1, LL_ADC_DATA_ALIGN_RIGHT);
 
-  /* 设置低功耗模式无 */
+  /* No ADC low power mode activated */
   LL_ADC_SetLowPowerMode(ADC1, LL_ADC_LP_MODE_NONE);
 
-  /* 设置通道转换时间 */
+  /* Sampling time 239.5 ADC clock cycles */
   LL_ADC_SetSamplingTimeCommonChannels(ADC1, LL_ADC_SAMPLINGTIME_239CYCLES_5);
 
-  /* 设置触发源为TIM1 TRGO */
+  /* ADC regular group conversion trigger from external IP: TIM1 TRGO. */
   LL_ADC_REG_SetTriggerSource(ADC1, LL_ADC_REG_TRIG_EXT_TIM1_TRGO);
 
-  /* 设置上升沿触发转换 */
+  /* Set Trigger edge to rising edge */
   LL_ADC_REG_SetTriggerEdge(ADC1, LL_ADC_REG_TRIG_EXT_RISING);
 
-  /* 设置转换模式为单次转换 */
+  /* Set ADC conversion mode to single mode: one conversion per trigger */
   LL_ADC_REG_SetContinuousMode(ADC1, LL_ADC_REG_CONV_SINGLE);
 
-  /* 设置过载管理模式为覆盖上一个值 */
+  /* ADC regular group behavior in case of overrun: data overwritten */
   LL_ADC_REG_SetOverrun(ADC1, LL_ADC_REG_OVR_DATA_OVERWRITTEN);
 
-  /* 设置非连续模式为不使能 */
+  /* Disable ADC regular group sequencer discontinuous mode  */
   LL_ADC_REG_SetSequencerDiscont(ADC1, LL_ADC_REG_SEQ_DISCONT_DISABLE);
 
-  /* 设置通道4为转换通道 */
+  /* Set channel 4 as conversion channel */
   LL_ADC_REG_SetSequencerChannels(ADC1, LL_ADC_CHANNEL_4);
-   
-  /* 配置内部转换通道无 */
+
+  /* Dose not enable internal conversion channel */
   LL_ADC_SetCommonPathInternalCh(__LL_ADC_COMMON_INSTANCE(ADC1), LL_ADC_PATH_INTERNAL_NONE );
-  
-  /* 设置通道4为模拟看门狗通道 */
+
+  /* Set channel 4 as ADC analog watchdog channel */
   LL_ADC_SetAnalogWDMonitChannels(ADC1, LL_ADC_AWD_CHANNEL_4_REG);
-  
-  /* 设置模拟看门狗的上限为0x800,下限为0x0 */
+
+  /* Set the analog watchdog threshold in the range of 0~0x800 */
   LL_ADC_ConfigAnalogWDThresholds(ADC1,0x800,0x0);
-  
+
   NVIC_SetPriority(ADC_COMP_IRQn, 0);
   NVIC_EnableIRQ(ADC_COMP_IRQn);
-  
-  /* 使能模拟看门狗中断 */
+
+  /* Enable ADC analog watchdog IT */
   LL_ADC_EnableIT_AWD(ADC1);
 }
 
 /**
-  * @brief  ADC校准函数.
-  * @param  无
-  * @retval 无
+  * @brief  ADC calibration program.
+  * @param  None
+  * @retval None
   */
 static void APP_AdcCalibrate(void)
 {
@@ -164,8 +172,8 @@ static void APP_AdcCalibrate(void)
 
   if (LL_ADC_IsEnabled(ADC1) == 0)
   {
-    
-    /* 使能校准 */
+
+    /* Enable ADC calibration */
     LL_ADC_StartCalibration(ADC1);
 
 #if (USE_TIMEOUT == 1)
@@ -175,7 +183,7 @@ static void APP_AdcCalibrate(void)
     while (LL_ADC_IsCalibrationOnGoing(ADC1) != 0)
     {
 #if (USE_TIMEOUT == 1)
-      /* 检测校准是否超时 */
+      /* Detects if the calibration has timed out */
       if (LL_SYSTICK_IsActiveCounterFlag())
       {
         if(Timeout-- == 0)
@@ -186,52 +194,52 @@ static void APP_AdcCalibrate(void)
 #endif
     }
 
-    /* ADC校准结束和使能ADC之间的延时最低4个ADC Clock */
+    /* The delay between the end of ADC calibration and ADC enablement is at least 4 ADC clocks */
     LL_mDelay(1);
   }
 }
 
 /**
-  * @brief  ADC使能函数.
-  * @param  无
-  * @retval 无
+  * @brief  Enable ADC.
+  * @param  None
+  * @retval None
   */
 static void APP_AdcEnable(void)
 {
-  /* 使能ADC */
+  /* Enable ADC */
   LL_ADC_Enable(ADC1);
 
-  /* 使能ADC 稳定时间，最低8个ADC Clock */
+  /* The delay between ADC enablement and ADC stabilization is at least 8 ADC clocks */
   LL_mDelay(1);
 }
 
 /**
-  * @brief  TIM1配置函数.
-  * @param  无
-  * @retval 无
+  * @brief  TIM1 configuration program.
+  * @param  None
+  * @retval None
   */
 static void APP_TimerInit()
 {
-  /* 使能TIM1时钟 */
+  /* Enable TIM1 clock */
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_TIM1);
 
-  /* 设置TIM1预分频器 */
+  /* Set TIM1 prescale */
   LL_TIM_SetPrescaler(TIM1,6000);
 
-  /* 设置TIM1自动重装载值 */
+  /* Set TIM1 auto-reload value */
   LL_TIM_SetAutoReload(TIM1, 4000);
 
-  /* 设置TIM1更新触发 */
+  /* TIM1 Update event is used as trigger output */
   LL_TIM_SetTriggerOutput(TIM1,LL_TIM_TRGO_UPDATE);
 
-  /* 使能TIM1 */
+  /* Enable TIM1 */
   LL_TIM_EnableCounter(TIM1);
 }
 
 /**
-  * @brief  ADC中断处理转换函数.
-  * @param  无
-  * @retval 无
+  * @brief  ADC interruption handler callback program.
+  * @param  None
+  * @retval None
   */
 void APP_AdcAWDCallback()
 {
@@ -239,43 +247,43 @@ void APP_AdcAWDCallback()
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure Systemclock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB divider: HCLK = SYSCLK */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* HSISYS used as SYSCLK clock source  */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 divider */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(24000000);
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  Error handling function
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* Infinite loop */
   while (1)
   {
   }
@@ -283,16 +291,17 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file：Pointer to the source file name
+  * @param  line：assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add His own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* Infinite loop */
   while (1)
   {
   }

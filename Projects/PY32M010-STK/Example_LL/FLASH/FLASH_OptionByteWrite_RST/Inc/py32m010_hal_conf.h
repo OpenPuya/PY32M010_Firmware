@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -36,7 +44,21 @@
   * @brief This is the list of modules to be used in the HAL driver 
   */
 #define HAL_MODULE_ENABLED  
+#define HAL_RCC_MODULE_ENABLED
+/* #define HAL_ADC_MODULE_ENABLED */
+/* #define HAL_CRC_MODULE_ENABLED */
+/* #define HAL_COMP_MODULE_ENABLED */
 #define HAL_FLASH_MODULE_ENABLED   
+#define HAL_GPIO_MODULE_ENABLED    
+/* #define HAL_IWDG_MODULE_ENABLED */
+/* #define HAL_TIM_MODULE_ENABLED */
+/* #define HAL_LPTIM_MODULE_ENABLED */
+#define HAL_PWR_MODULE_ENABLED
+/* #define HAL_I2C_MODULE_ENABLED */
+#define HAL_UART_MODULE_ENABLED
+/* #define HAL_USART_MODULE_ENABLED */
+/* #define HAL_SPI_MODULE_ENABLED */
+/* #define HAL_EXTI_MODULE_ENABLED */
 #define HAL_CORTEX_MODULE_ENABLED  
 
 /* ########################## Oscillator Values adaptation ####################*/
@@ -46,7 +68,7 @@
 #endif /* HSI_VALUE */
 
 /**
-  * @brief Adjust the value of External High Speed oscillator (HXT) used in your application.
+  * @brief Adjust the value of External High Speed oscillator (HSE) used in your application.
   *        This value is used by the RCC HAL module to compute the system frequency
   */
 #if !defined  (HSE_VALUE) 
@@ -54,20 +76,20 @@
 #endif /* HSE_VALUE */
 
 #if !defined  (HSE_STARTUP_TIMEOUT)
-  #define HSE_STARTUP_TIMEOUT    ((uint32_t)200)   /*!< Time out for HXT start up, in ms */
+  #define HSE_STARTUP_TIMEOUT    ((uint32_t)200)   /*!< Time out for HSE start up, in ms */
 #endif /* HSE_STARTUP_TIMEOUT */
 
 /**
   * @brief Internal Low Speed Internal oscillator (LSI) value.
   */
 #if !defined  (LSI_VALUE) 
- #define LSI_VALUE               32768U    /*!< LIRC Typical Value in Hz */
-#endif /* LSI_VALUE */                     /*!< Value of the Internal Low Speed oscillator in Hz
-                                                The real value may vary depending on the variations
-                                                in voltage and temperature. */
+ #define LSI_VALUE               ((uint32_t)32768)    /*!< LSI Typical Value in Hz */
+#endif /* LSI_VALUE */                                /*!< Value of the Internal Low Speed oscillator in Hz
+                                                       The real value may vary depending on the variations
+                                                       in voltage and temperature. */
 
 /**
-  * @brief Adjust the value of External Low Speed oscillator (LXT) used in your application.
+  * @brief Adjust the value of External Low Speed oscillator (LSE) used in your application.
   *        This value is used by the RCC HAL module to compute the system frequency  
   */
 #if !defined  (LSE_VALUE)
@@ -75,7 +97,7 @@
 #endif /* LSE_VALUE */
 
 #if !defined  (LSE_STARTUP_TIMEOUT)
-  #define LSE_STARTUP_TIMEOUT    ((uint32_t)5000)   /*!< Time out for LXT start up, in ms */
+  #define LSE_STARTUP_TIMEOUT    ((uint32_t)5000)   /*!< Time out for LSE start up, in ms */
 #endif /* LSE_STARTUP_TIMEOUT */
 
 /* Tip: To avoid modifying this file each time you need to use different HSE,
@@ -92,7 +114,7 @@
 #define  PRIORITY_LOWEST         3
 #define  TICK_INT_PRIORITY       ((uint32_t)PRIORITY_LOWEST)    /*!< tick interrupt priority (lowest by default)  */            
 #define  USE_RTOS                0
-#define  PREFETCH_ENABLE         1
+#define  PREFETCH_ENABLE         0
 
 /* ########################## Assert Selection ############################## */
 /**
@@ -110,13 +132,69 @@
  #include "py32mxxx_hal.h"
 #endif /* HAL_MODULE_ENABLED */
 
+#ifdef HAL_RCC_MODULE_ENABLED
+ #include "py32m010_hal_rcc.h"
+#endif /* HAL_RCC_MODULE_ENABLED */
+
+#ifdef HAL_EXTI_MODULE_ENABLED
+ #include "py32m010_hal_exti.h"
+#endif /* HAL_EXTI_MODULE_ENABLED */
+
+#ifdef HAL_GPIO_MODULE_ENABLED
+ #include "py32m010_hal_gpio.h"
+#endif /* HAL_GPIO_MODULE_ENABLED */
+
 #ifdef HAL_CORTEX_MODULE_ENABLED
  #include "py32m010_hal_cortex.h"
 #endif /* HAL_CORTEX_MODULE_ENABLED */
 
+#ifdef HAL_ADC_MODULE_ENABLED
+ #include "py32m010_hal_adc.h"
+#endif /* HAL_ADC_MODULE_ENABLED */
+
+#ifdef HAL_CRC_MODULE_ENABLED
+ #include "py32m010_hal_crc.h"
+#endif /* HAL_CRC_MODULE_ENABLED */
+
+#ifdef HAL_COMP_MODULE_ENABLED
+#include "py32m010_hal_comp.h"
+#endif /* HAL_COMP_MODULE_ENABLED */
+
 #ifdef HAL_FLASH_MODULE_ENABLED
  #include "py32m010_hal_flash.h"
 #endif /* HAL_FLASH_MODULE_ENABLED */
+
+#ifdef HAL_I2C_MODULE_ENABLED
+ #include "py32m010_hal_i2c.h"
+#endif /* HAL_I2C_MODULE_ENABLED */
+
+#ifdef HAL_IWDG_MODULE_ENABLED
+ #include "py32m010_hal_iwdg.h"
+#endif /* HAL_IWDG_MODULE_ENABLED */
+
+#ifdef HAL_PWR_MODULE_ENABLED
+ #include "py32m010_hal_pwr.h"
+#endif /* HAL_PWR_MODULE_ENABLED */
+
+#ifdef HAL_SPI_MODULE_ENABLED
+ #include "py32m010_hal_spi.h"
+#endif /* HAL_SPI_MODULE_ENABLED */
+
+#ifdef HAL_TIM_MODULE_ENABLED
+ #include "py32m010_hal_tim.h"
+#endif /* HAL_TIM_MODULE_ENABLED */
+
+#ifdef HAL_LPTIM_MODULE_ENABLED
+ #include "py32m010_hal_lptim.h" 
+#endif /* HAL_LPTIM_MODULE_ENABLED */
+
+#ifdef HAL_UART_MODULE_ENABLED
+ #include "py32m010_hal_uart.h"
+#endif /* HAL_UART_MODULE_ENABLED */
+
+#ifdef HAL_USART_MODULE_ENABLED
+ #include "py32m010_hal_usart.h"
+#endif /* HAL_USART_MODULE_ENABLED */
 
 /* Exported macro ------------------------------------------------------------*/
 #ifdef  USE_FULL_ASSERT
@@ -139,6 +217,6 @@
 }
 #endif
 
-#endif /* __py32m010_HAL_CONF_H */
+#endif /* __PY32M010_HAL_CONF_H */
 
-/************************ (C) COPYRIGHT Puya *****END OF FILE****/
+/************************ (C) COPYRIGHT Puya *****END OF FILE******************/

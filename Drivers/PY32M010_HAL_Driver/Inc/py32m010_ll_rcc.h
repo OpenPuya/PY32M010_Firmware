@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -181,7 +189,7 @@ typedef struct
 /**
   * @}
   */
-	
+  
 /** @defgroup RCC_LL_EC_LSESTARTUP  LSE oscillator startup time
   * @{
   */
@@ -388,7 +396,7 @@ typedef struct
 /**
   * @}
   */
-	
+  
 /** @defgroup RCC_LSI_EC_Calibration LSI Calibration
 * @{
 */
@@ -808,7 +816,7 @@ __STATIC_INLINE void LL_RCC_LSI_SetCalibTrimming(uint32_t Value)
 /**
   * @brief  Get LSI Calibration trimming
   * @rmtoll ICSCR        LSI_TRIM       LL_RCC_LSI_GetCalibTrimming
-  * @retval Between Min_Data = 0 and Max_Data = 0x1FFF
+  * @retval Between Min_Data = 0 and Max_Data = 0x1FF
   */
 __STATIC_INLINE uint32_t LL_RCC_LSI_GetCalibTrimming(void)
 {
@@ -822,13 +830,12 @@ __STATIC_INLINE uint32_t LL_RCC_LSI_GetCalibTrimming(void)
 __STATIC_INLINE uint32_t LL_RCC_LSI_GetFreq(void)
 {
   return ((LL_RCC_LSI_GetCalibTrimming() == LL_RCC_LSICALIBRATION_32768Hz) ? 32768UL : \
-		     ((LL_RCC_LSI_GetCalibTrimming() == LL_RCC_LSICALIBRATION_38400Hz) ? 38400UL : 0));
+         ((LL_RCC_LSI_GetCalibTrimming() == LL_RCC_LSICALIBRATION_38400Hz) ? 38400UL : 0));
 }
 
 /**
   * @}
   */
-#if defined(RCC_BDCR_LSCOEN)
 /** @defgroup RCC_LL_EF_LSCO LSCO
   * @{
   */
@@ -840,7 +847,7 @@ __STATIC_INLINE uint32_t LL_RCC_LSI_GetFreq(void)
   */
 __STATIC_INLINE void LL_RCC_LSCO_Enable(void)
 {
-  SET_BIT(RCC->BDCR, RCC_BDCR_LSCOEN);
+/*  SET_BIT(RCC->BDCR, RCC_BDCR_LSCOEN); */
 }
 
 /**
@@ -850,8 +857,9 @@ __STATIC_INLINE void LL_RCC_LSCO_Enable(void)
   */
 __STATIC_INLINE void LL_RCC_LSCO_Disable(void)
 {
-  CLEAR_BIT(RCC->BDCR, RCC_BDCR_LSCOEN);
+/*  CLEAR_BIT(RCC->BDCR, RCC_BDCR_LSCOEN); */
 }
+
 #if defined(RCC_BDCR_LSCOSEL)
 /**
   * @brief  Configure Low speed clock selection
@@ -881,7 +889,6 @@ __STATIC_INLINE uint32_t LL_RCC_LSCO_GetSource(void)
 /**
   * @}
   */
-#endif
 #endif
 /** @defgroup RCC_LL_EF_System System
   * @{
@@ -1129,7 +1136,10 @@ __STATIC_INLINE uint32_t LL_RCC_GetMCODiv(uint32_t MCOx)
   */
 __STATIC_INLINE void LL_RCC_SetCOMPClockSource(uint32_t COMPxSource)
 {
-  MODIFY_REG(RCC->CCIPR, (COMPxSource & 0x0000FF00U), ((COMPxSource & 0xFFU) | ((COMPxSource & 0xFFU) >> 2)) << 8U);
+  register uint32_t regTmp1 = (RCC->CCIPR & 0x0000FF00U) & (~(COMPxSource & 0x0000FF00U));
+  regTmp1 = regTmp1 | (regTmp1 >> 2);
+  register uint32_t regTmp2 = ((COMPxSource & 0xFFU) | ((COMPxSource & 0xFFU) >> 2)) << 8U;
+  MODIFY_REG(RCC->CCIPR, (COMPxSource & 0x0000FF00U), (regTmp1 | regTmp2));
 }
 #endif /* COMP1 */
 

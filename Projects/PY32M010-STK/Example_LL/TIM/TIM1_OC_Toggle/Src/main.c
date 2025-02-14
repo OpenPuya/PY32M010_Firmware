@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -33,120 +41,120 @@ static void APP_SystemClockConfig(void);
 static void APP_ConfigTIM1OutputComparison(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure Systemclock */
   APP_SystemClockConfig();
-  
-  /* 使能TIM1时钟 */
-  LL_APB1_GRP2_EnableClock(RCC_APBENR2_TIM1EN);
-  
-  /* 使能GPIOA时钟 */
+
+  /* Enable TIM1 peripheral clock */
+  LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_TIM1);
+
+  /* Enabel GPIOA clock */
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
-  
-  /* 初始化LED */
+
+  /* Initialize LED */
   BSP_LED_Init(LED3);
-  
-  /* 配置并开启TIM1输出比较模式 */
+
+  /* Configure TIM1 in output compare mode */
   APP_ConfigTIM1OutputComparison();
-  
+
   while (1)
   {
   }
 }
 
 /**
-  * @brief  TIM1输出比较模式配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure TIM1 in output compare mode
+  * @param  None
+  * @retval None
   */
 static void APP_ConfigTIM1OutputComparison(void)
 {
-  /* 1分频 */
+  /* Set divider:tDTS=tCK_INT */
   LL_TIM_SetClockDivision(TIM1,LL_TIM_CLOCKDIVISION_DIV1);
-  
-  /* 向上计数模式 */
+
+  /* Up count mode */
   LL_TIM_SetCounterMode(TIM1,LL_TIM_COUNTERMODE_UP);
-  
-  /* 重装载值3000 */
+
+  /* Set auto reload valve:3000 */
   LL_TIM_SetAutoReload(TIM1,3000-1);
-  
-  /* 预分频值：8000 */
+
+  /* Prescaler：CK_CNT = fCK_PSC / 8000 */
   LL_TIM_SetPrescaler(TIM1,8000-1);
-  
-  /* 配置通道1 */
-  /* 配置输出极性为高有效 */
+
+  /* Set channle 1 */
+  /* Configure output polarity to high active */
   LL_TIM_OC_SetPolarity(TIM1,LL_TIM_CHANNEL_CH1,LL_TIM_OCPOLARITY_HIGH);
-  
-  /* 配置空闲极性为低 */
+
+  /* Configure idle polarity to low */
   LL_TIM_OC_SetIdleState(TIM1,LL_TIM_CHANNEL_CH1,LL_TIM_OCIDLESTATE_LOW);
-  
-  /* 设置比较值：500 */
+
+  /* Set compare value：500 */
   LL_TIM_OC_SetCompareCH1(TIM1,500);
-  
-  /* 设置TIM1通道1为输出比较翻转模式 */
+
+  /* SET TIM1 OC1REF to toggles on compare match */
   LL_TIM_OC_SetMode(TIM1,LL_TIM_CHANNEL_CH1,LL_TIM_OCMODE_TOGGLE);
-  
-  /* 通道1输出映射PA5 */
+
+  /* CH1 map to PA5 */
   LL_GPIO_SetPinMode(GPIOA,LL_GPIO_PIN_5,LL_GPIO_MODE_ALTERNATE);
   LL_GPIO_SetPinOutputType(GPIOA,LL_GPIO_PIN_5,LL_GPIO_OUTPUT_PUSHPULL);
   LL_GPIO_SetAFPin_0_7(GPIOA,LL_GPIO_PIN_5,LL_GPIO_AF_2);
-  
-  /* 使能通道1 */
+
+  /* Enable channel 1 */
   LL_TIM_CC_EnableChannel(TIM1,LL_TIM_CHANNEL_CH1);
-  
-  /* 关闭自动输出 */
+
+  /* Disable automatic output */
   LL_TIM_DisableAutomaticOutput(TIM1);
-  
-  /* 主输出使能 */
+
+  /* Enable output */
   LL_TIM_EnableAllOutputs(TIM1);
-  
-  /* 开启TIM1计数器 */
+
+  /* Enable TIM1 */
   LL_TIM_EnableCounter(TIM1);
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure Systemclock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB divider: HCLK = SYSCLK */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* HSISYS used as SYSCLK clock source  */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 divider */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(24000000);
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  Error handling function
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* Infinite loop */
   while (1)
   {
   }
@@ -154,16 +162,17 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file：Pointer to the source file name
+  * @param  line：assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add His own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* Infinite loop */
   while (1)
   {
   }

@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -60,33 +68,32 @@ static void APP_SystemClockConfig(void);
 static uint32_t APP_CalculateCRC(uint32_t pBuffer[],uint32_t BufferLength);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure Systemclock */
   APP_SystemClockConfig();
-  
-  /* 初始化LED */
+
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-   /*使能CRC模块时钟*/
+   /* Enable CRC clock */
   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_CRC);
-  
-  /*计算CRC值*/
+
+  /* Calculate CRC */
   CRCValue=APP_CalculateCRC((uint32_t *)aDataBuffer,BUFFER_SIZE);
 
   while (1)
   {
-    /*CRC值错误，LED翻转*/
+    /* Wrong CRC value: LED off */
     if (CRCValue != ExpectedCRCValue)
     {
-      BSP_LED_Toggle(LED_GREEN);
-      LL_mDelay(200);
+      BSP_LED_Off(LED_GREEN);
     }
-    /*CRC值正确，LED常亮*/
+    /* Right CRC valu：LED on */
     else
     {
       BSP_LED_On(LED_GREEN);
@@ -95,10 +102,10 @@ int main(void)
 }
 
 /**
-  * @brief  CRC值计算函数
-  * @param  pBuffer：CRC数组
-  * @param  BufferLength：CRC数组长度
-  * @retval CRC值
+  * @brief  CRC Calculate
+  * @param  pBuffer：CRC input data buffer
+  * @param  BufferLength：input data buffer length
+  * @retval CRC Calculation result
   */
 static uint32_t APP_CalculateCRC(uint32_t pBuffer[],uint32_t BufferLength)
 {
@@ -106,48 +113,48 @@ static uint32_t APP_CalculateCRC(uint32_t pBuffer[],uint32_t BufferLength)
   {
     LL_CRC_FeedData32(CRC, pBuffer[index]);
   }
-  /* 返回CRC值 */
+  /* return CRC Calculation result */
   return (LL_CRC_ReadData32(CRC));
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure Systemclock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB divider: HCLK = SYSCLK */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* HSISYS used as SYSCLK clock source  */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 divider */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(24000000);
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  Error handling function
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* Infinite loop */
   while (1)
   {
   }
@@ -155,16 +162,17 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file：Pointer to the source file name
+  * @param  line：assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add His own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* Infinite loop */
   while (1)
   {
   }

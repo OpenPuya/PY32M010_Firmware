@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -26,12 +34,12 @@
 
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-/* 发送缓冲区定义 */
+/* Send buffer define */
 uint8_t aTxBuffer[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 uint8_t ubNbDataToTransmit = sizeof(aTxBuffer);
 uint8_t ubTransmitIndex = 0;
 
-/* 接收缓冲区定义 */
+/* Receive buffer define */
 uint8_t aRxBuffer[sizeof(aTxBuffer)] = {0};
 uint8_t ubNbDataToReceive = sizeof(aTxBuffer);
 uint8_t ubReceiveIndex = 0;
@@ -46,34 +54,34 @@ static void APP_WaitAndCheckEndOfTransfer(void);
 static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t BufferLength);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure Systemclock */
   APP_SystemClockConfig();
 
-  /* 初始化调试串口(printf使用) */
+  /* Initialize USART( for printf use) */
   BSP_USART_Config();
 
-  /* 初始化按键BUTTON */
+  /* Intialize BUTTON */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
 
- /* 初始化SPI */
+  /* Initialize SPI peripheral */
   APP_ConfigSPI();
 
-  /*等待按键按下*/
+  /* wait for the button to be pressed */
   while(BSP_PB_GetState(BUTTON_KEY) == 1);
-  
-  /* 使能 SPI1 */
+
+  /* Enable SPI1 */
   LL_SPI_Enable(SPI1);
-  
-  /* 主机收发数据 */
+
+  /* Master send and receive data */
   APP_SpiMasterTransmitReceive();
-  
-  /* 等待传输结束并检查接收到的数据 */
+
+  /* Wait for transfer to be completed,and check received data */
   APP_WaitAndCheckEndOfTransfer();
 
   while (1)
@@ -82,39 +90,39 @@ int main(void)
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure Systemclock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB divider:HCLK = SYSCLK*/
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* HSISYS used as SYSCLK source */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 divider*/
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update the system clock global variable SystemCoreClock (can also be updated by calling the SystemCoreClockUpdate() function) */
   LL_SetSystemCoreClock(24000000);
 }
 
 /**
-  * @brief  SPI1配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Set SPI1 fearures
+  * @param  None
+  * @retval None
   */
 static void APP_ConfigSPI(void)
 {
@@ -122,13 +130,13 @@ static void APP_ConfigSPI(void)
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  /* 使能时钟 */
+  /* Enable SPI1 periphreal clock */
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_SPI1);
 
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOB);
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
-  
-  /**SPI1 引脚配置
+
+  /**SPI1 I/O configuration
   PB2   ------> SPI1_SCK
   PA1   ------> SPI1_MISO
   PA7   ------> SPI1_MOSI
@@ -157,11 +165,7 @@ static void APP_ConfigSPI(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_0;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /* SPI1 中断配置 */
-  NVIC_SetPriority(SPI1_IRQn, 1);
-  NVIC_EnableIRQ(SPI1_IRQn);
-
-  /* SPI1 参数配置*/
+  /* Set SPI1 features */
   SPI_InitStruct.TransferDirection = LL_SPI_FULL_DUPLEX;
   SPI_InitStruct.Mode = LL_SPI_MODE_MASTER;
   SPI_InitStruct.DataWidth = LL_SPI_DATAWIDTH_8BIT;
@@ -174,25 +178,27 @@ static void APP_ConfigSPI(void)
 }
 
 /**
-  * @brief  SPI1数据收发函数
-  * @param  无
-  * @retval 无
+  * @brief  SPI1 receive and send data program
+  * @param  None
+  * @retval None
   */
 static void APP_SpiMasterTransmitReceive(void)
 {
   uint32_t             txallowed = 1U;
-  
-  /* 轮询数据收发 */
+
+  /* Data is sent and received in polling mode */
   while((ubReceiveIndex < ubNbDataToReceive) || (ubTransmitIndex < ubNbDataToTransmit))
   {
-    /* 等待发送(发送条件：发送数据寄存器空，数据未发送完成，接收完成) */
+    /* wait to send data(The following conditions are required to start sending data：send data register is empty，
+       there's still data to transfer ，Receive completely) */
     if ((LL_SPI_IsActiveFlag_TXE(SPI1) == 1) && (ubTransmitIndex < ubNbDataToTransmit) && txallowed == 1U)
     {
       LL_SPI_TransmitData8(SPI1, aTxBuffer[ubTransmitIndex++]);
       txallowed = 0U;
     }
-    
-    /* 等待接收(接收条件：接收数据寄存器满，数据未接收完成) */
+
+    /* wait to receive data(The following conditions are required to start receiving data：receive data register is empty，
+       there's still data to receive ，send completely) */
     if((LL_SPI_IsActiveFlag_RXNE(SPI1) == 1) && (ubReceiveIndex < ubNbDataToReceive))
     {
       aRxBuffer[ubReceiveIndex++] = LL_SPI_ReceiveData8(SPI1);
@@ -202,45 +208,45 @@ static void APP_SpiMasterTransmitReceive(void)
 }
 
 /**
-  * @brief  SPI1等待传输完成，并校验数据
-  * @param  无
-  * @retval 无
+  * @brief Wait for transfer to be completed,and check received data
+  * @param  None
+  * @retval None
   */
 static void APP_WaitAndCheckEndOfTransfer(void)
 {
-  /* 1 - 等待传输结束 */
+  /* 1 - Wait for transfer to be completed */
   while (ubTransmitIndex != ubNbDataToTransmit)
   {
   }
-  /* 关 TXE 中断 */
+  /* Disable TXE interrupt request   */
   LL_SPI_DisableIT_TXE(SPI1);
 
-  /* 2 - 等待接收结束 */
+  /* 2 - Wait for receive to be completed */
   while (ubNbDataToReceive > ubReceiveIndex)
   {
   }
-  /* 关 RXNE 中断 */
+  /*  Disable RxNE interrupt request */
   LL_SPI_DisableIT_RXNE(SPI1);
 
-  /* 3 - 比较发送数据和接收数据 */
+  /* 3 - Compare sent data with received data */
   if(APP_Buffercmp8((uint8_t*)aTxBuffer, (uint8_t*)aRxBuffer, ubNbDataToTransmit))
   {
-    /* 通讯错误提示 */
+    /* printf error notice */
     printf("SPI Transfer Error");
   }
   else
   {
-    /* 通讯成功提示 */
+    /* printf transfer successfully notice */
     printf("SPI transfer succeeded");
   }
 }
 
 /**
-  * @brief  字符比较函数
-  * @param  pBuffer1：待比较缓冲区1
-  * @param  pBuffer2：待比较缓冲区2
-  * @param  BufferLength：待比较字符的个数
-  * @retval 0：比较值相同；1：比较值不同
+  * @brief  Character Comparison function
+  * @param  pBuffer1：pBuffer1 pointer to buffer1
+  * @param  pBuffer2：pBuffer1 pointer to buffer2
+  * @param  BufferLength：The number of characters to be compared
+  * @retval 0：The contents of buffer1 are equal to buffer2. 1: The contents of buffer1 are not equal to buffer2
   */
 static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t BufferLength)
 {
@@ -258,13 +264,13 @@ static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t Buff
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  Error handling function
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* Infinite loop */
   while (1)
   {
   }
@@ -272,16 +278,17 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file：Pointer to the source file name
+  * @param  line：assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add His own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* Infinite loop */
   while (1)
   {
   }

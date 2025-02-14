@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -25,7 +33,7 @@
 #include "py32m010xx_ll_Start_Kit.h"
 
 /* Private define ------------------------------------------------------------*/
-/* I2C SPEEDCLOCK 定义为最大值：快速模式(400kHz) */
+/* I2C SPEEDCLOCK is defined as the maximum value：Fast mode(400kHz) */
 #define I2C_SPEEDCLOCK           400000
 #define I2C_DUTYCYCLE            LL_I2C_DUTYCYCLE_2
 
@@ -55,46 +63,46 @@ static void     APP_HandleI2cMaster(void);
 #endif /* SLAVE_BOARD */
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure Systemclock */
   APP_SystemClockConfig();
 
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-  /* 初始化按键BUTTON */
+  /* Initialize BUTTON */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
 
   #ifdef SLAVE_BOARD
-  /* 配置I2C1（Slave模式下的I2C配置及相关GPIO初始化）*/
+  /* Configure I2C1（I2C configuration in slave mode and related GPIO initialization）*/
   APP_ConfigI2cSlave();
 
-  /* 等待用户按下按钮开始传输 */
+  /* Wait for the button to be pressed */
   while(BSP_PB_GetState(BUTTON_KEY) == 1)
   {}
 
-  /* 使能 I2C1 外设（从机） */
+  /* Enable I2C1 periphreal（as slave ） */
   APP_ActivateI2cSlave();
 
-  /* 处理 I2C1 事件（从机） */
+  /* Handling I2C1 events (as slave) */
   APP_HandleI2cSlave();
 #else /* MASTER_BOARD */
-  /*配置I2C1（主模式下I2C配置及相关GPIO初始化）*/
+  /* Configure I2C1（I2C configuration in master mode and related GPIO initialization）*/
   APP_ConfigI2cMaster();
 
-  /* 等待用户按下按钮开始传输 */
+  /* Wait for the button to be pressed */
   while(BSP_PB_GetState(BUTTON_KEY) == 1)
   {}
 
-  /* 使能 I2C1 外设（主机） */
+  /* Enable I2C1 periphreal（as master ） */
   APP_ActivateI2cMaster();
 
-  /* 处理 I2C1 事件（主机） */
+  /* Handling I2C1 events (as master ) */
   APP_HandleI2cMaster();
 #endif /* SLAVE_BOARD */
 
@@ -104,56 +112,58 @@ int main(void)
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure Systemclock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB divider: HCLK = SYSCLK */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* HSISYS used as SYSCLK clock source  */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 divider */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(24000000);
 }
 
 #ifdef SLAVE_BOARD
 /**
-  * @brief  配置I2C1为从模式
-  * @param  无
-  * @retval 无
+  * @brief  Configure I2C peripheral(as slave)
+  * @param  None
+  * @retval None
   */
 static void APP_ConfigI2cSlave(void)
 {
-  /* (1) 使能 GPIO 时钟 ************************/
+  /* (1) Enable GPIO clock ************************/
 
-  /* 使能 GPIOB 的外设时钟 */
+  /* Enabel GPIOB clock */
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOB);
 
-  /* (2) 使能 I2C1 外设时钟 *************************************/
+  /* (2) Enable I2C1 peripheral clock *************************************/
 
-  /* 启用 I2C1 的外设时钟 */
+  /* Enabke I2C1 peripheral clock */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
 
-  /* 将 SCL 引脚配置为：可选功能、高速、开漏、上拉 */
+  /* Set PB3 to SCL pin , Select alternate function mode
+     and fast output speed. output type is Selected open-drain,
+     Enable I/O pull up*/
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-  
+
   GPIO_InitStruct.Pin = LL_GPIO_PIN_3;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
@@ -162,7 +172,9 @@ static void APP_ConfigI2cSlave(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_6;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* 将 SDA 引脚配置为：可选功能、高速、开漏、上拉 */
+  /* Set PB4 to SDA pin , Select alternate function mode
+     and fast output speed. output type is Selected open-drain,
+     Enable I/O pull up*/
   GPIO_InitStruct.Pin = LL_GPIO_PIN_4;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
@@ -171,29 +183,29 @@ static void APP_ConfigI2cSlave(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_6;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* (3) 配置I2C1功能参数***********************/
-  
-  /* 在修改配置寄存器之前禁用 I2C1 */
+  /* (3) configure I2C1 features***********************/
+
+  /* Disable I2C1 before modify I2C1 control register */
   LL_I2C_Disable(I2C1);
-  
-  /* 配置从机地址：
-    * - OwnAddress1 是 SLAVE_OWN_ADDRESS
+
+  /* Set slave address：
+    * - OwnAddress1 is SLAVE_OWN_ADDRESS
     */
   LL_I2C_SetOwnAddress1(I2C1, SLAVE_OWN_ADDRESS, 0);
 
-  /* 启用时钟拉伸 */
-  /* 复位值是启用时钟延长 */
+  /* Enable clock stretching */
+  /* Reset value is clock stretching enabled */
   /* LL_I2C_EnableClockStretching(I2C1); */
-  
-  /* 启用广播呼叫 */
-  /* 复位值为禁用广播呼叫 */
+
+  /* Enable general call  */
+  /* Reset value is general call disabled */
   /* LL_I2C_EnableGeneralCall(I2C1); */
 }
 
 /**
-  * @brief  使能I2C1(从机)
-  * @param  无
-  * @retval 无
+  * @brief  Enable I2C1(as slave)
+  * @param
+  * @retval None
   */
 static void APP_ActivateI2cSlave(void)
 {
@@ -203,27 +215,29 @@ static void APP_ActivateI2cSlave(void)
 #else /* MASTER_BOARD */
 
 /**
-  * @brief  配置I2C1为主模式
-  * @param  无
-  * @retval 无
+  * @brief  Configure I2C1 as master
+  * @param  None
+  * @retval None
   */
 static void APP_ConfigI2cMaster(void)
 {
-  LL_RCC_ClocksTypeDef rcc_clocks;
+  LL_RCC_ClocksTypeDef rcc_clocks = {0};
 
-  /* (1) 启用 GPIO 时钟 ************************/
+  /* (1) Enable GPIO clock ************************/
 
-  /* 使能 GPIOB 的外设时钟 */
+  /* Enable GPIOB clock */
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOB);
 
-  /* (2) 使能 I2C1 外设时钟 *************************************/
+  /* (2) Enable I2C1 clock *************************************/
 
-  /* 启用 I2C1 的外设时钟 */
+  /* Enable I2C1 periphreal clock */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
 
-  /* 将 SCL 引脚配置为：可选功能、高速、开漏、上拉 */
+  /* Set PB3 to SCL pin , Select alternate function mode
+     and fast output speed. output type is Selected open-drain,
+     Enable I/O pull up*/
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-  
+
   GPIO_InitStruct.Pin = LL_GPIO_PIN_3;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
@@ -232,7 +246,9 @@ static void APP_ConfigI2cMaster(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_6;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* 将 SDA 引脚配置为：可选功能、高速、开漏、上拉 */
+  /* Set PB4 to SCL pin , Select alternate function mode
+     and fast output speed. output type is Selected open-drain,
+     Enable I/O pull up*/
   GPIO_InitStruct.Pin = LL_GPIO_PIN_4;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
@@ -241,31 +257,30 @@ static void APP_ConfigI2cMaster(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_6;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* (3) 配置I2C1功能参数********************************/
-  
-  /* 在修改配置寄存器之前禁用 I2C1 */
+  /* (3) Set I2C1 feature********************************/
+
+  /* Disable I2C1 before modify I2C1 control register */
   LL_I2C_Disable(I2C1);
-  
-  /* 获取时钟频率 */
+
+  /* Record sysclk、pclk and hclk to rcc_clocks structure  */
   LL_RCC_GetSystemClocksFreq(&rcc_clocks);
 
-  /* 配置 SCL 时钟速度 */
+  /* Set SCL clock frequency */
   LL_I2C_ConfigSpeed(I2C1, rcc_clocks.PCLK1_Frequency, I2C_SPEEDCLOCK, I2C_DUTYCYCLE);
 
-  /* 启用时钟拉伸 */
-  /* 复位值是启用时钟延长 */
+  /* Enable clock stretching */
+  /* Reset value is clock stretching enabled */
   /* LL_I2C_EnableClockStretching(I2C1); */
 
-  
-  /* 启用广播呼叫 */
-  /* 复位值为禁用广播呼叫 */
+  /* Enable general call  */
+  /* Reset value is general call disabled */
   /* LL_I2C_EnableGeneralCall(I2C1); */
 }
 
 /**
-  * @brief  使能I2C1(主机)
-  * @param  无
-  * @retval 无
+  * @brief  Enable I2C1(as master)
+  * @param  None
+  * @retval None
   */
 static void APP_ActivateI2cMaster(void)
 {
@@ -275,85 +290,83 @@ static void APP_ActivateI2cMaster(void)
 
 #ifdef SLAVE_BOARD
 /**
-  * @brief  从机处理函数
-  * @param  无
-  * @retval 无
+  * @brief  I2C(as slave) handle program
+  * @param  None
+  * @retval None
   */
 static void APP_HandleI2cSlave(void)
 {
-  /* (1) 准备从机地址接收的确认 ************************/
+  /* (1) Prepare to return a successfully addressed ACK ************************/
   LL_I2C_AcknowledgeNextData(I2C1, LL_I2C_ACK);
 
-  /* (2) 等待 ADDR 标志并检查地址匹配码和方向 ************/
+  /* (2) Wait for ADDR bit to be set and check transmission direction ************/
   while(!LL_I2C_IsActiveFlag_ADDR(I2C1))
   {
   }
 
-  /* 验证传输方向，Read 时的方向，Slave 进入接收器模式 */
+  /* Check transmission direction if is read，Slave enter receiver mode */
   if(LL_I2C_GetTransferDirection(I2C1) == LL_I2C_DIRECTION_READ)
   {
-    /* 清除 ISR 寄存器中的 ADDR 标志值 */
+    /* Clear ADDR flag */
     LL_I2C_ClearFlag_ADDR(I2C1);
   }
   else
   {
-    /* 清除 ISR 寄存器中的 ADDR 标志值 */
+    /* Clear ADDR flag */
     LL_I2C_ClearFlag_ADDR(I2C1);
 
-    /* 调用错误函数 */
+    /* Call error handling program */
     APP_ErrorHandler();
   }
 
-  /* (3) 循环直到接收到传输结束（STOP 标志出现） ***************/
+  /* (3) Wait for STOP to be set ***************/
 
-  /* 循环直到 STOP 标志置位 */
+  /* Wait for STOP to be set */
   while(!LL_I2C_IsActiveFlag_STOP(I2C1))
   {
-    /* (3.1) 接收数据（RXNE 标志置位） **********************************/
+    /* (3.1) receive data（RXNE bit is set） **********************************/
 
-    /* 检查 ISR 寄存器中的 RXNE 标志值 */
+    /* Check RxNE if is set */
     if(LL_I2C_IsActiveFlag_RXNE(I2C1))
     {
-      /* 读取接收数据寄存器中的字符。
-       通过读取 DR 寄存器中的数据清除 RXNE 标志 */
+      /* Read data register to clear RxNE bit */
       aReceiveBuffer[ubReceiveIndex++] = LL_I2C_ReceiveData8(I2C1);
     }
 
-    /* (3.2) 接收数据（BTF 标志置位） ***********************************/
-    /* 检查 ISR 寄存器中的 BTF 标志值 */
+    /* (3.2) receive dara（BTF is set） ***********************************/
+    /* Check BTF if is set */
     if(LL_I2C_IsActiveFlag_BTF(I2C1))
     {
-      /* 读取接收数据寄存器中的字符。
-       通过读取 DR 寄存器中的数据清除 BTF 标志 */
+      /* Read data register to clear BTF bit */
       aReceiveBuffer[ubReceiveIndex++] = LL_I2C_ReceiveData8(I2C1);
     }
   }
 
-  /* (4) 清除挂起标志，检查数据一致性 **************************/
+  /* (4) Clear Stop detection flag ，check data consistency **************************/
   LL_I2C_ClearFlag_STOP(I2C1);
 
-  /* 检查数据是否请求打开 LED */
+  /* Check whether the data is the same*/
   if(APP_Buffercmp8((uint8_t*)aReceiveBuffer, (uint8_t*)aLedOn, (ubReceiveIndex-1)) == 0)
   {
-    /* 打开 LED：
-      * - 已收到预期的字节
-      * - 从 Rx 序列成功完成
+    /* turn on LED：
+      * - The expected bytes have been received
+      * - Rx sequence completed successfully
       */
       BSP_LED_On(LED_GREEN);
   }
   else
   {
-    /* 调用错误函数 */
+    /* Call error handling program */
     APP_ErrorHandler();
   }
 }
 
 /**
-  * @brief  字符比较函数
-  * @param  pBuffer1：待比较字符存放的buff1
-  * @param  pBuffer2：待比较字符存放的buff2
-  * @param  BufferLength：待比较字符长度
-  * @retval 0：比较的字符完全一致；1：比较的字符不完全一致；
+  * @brief  Character Comparison function
+  * @param  pBuffer1：pBuffer1 pointer to buffer1
+  * @param  pBuffer2：pBuffer1 pointer to buffer2
+  * @param  BufferLength：The number of characters to be compared
+  * @retval 0：The contents of buffer1 are equal to buffer2. 1: The contents of buffer1 are not equal to buffer2
   */
 static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t BufferLength)
 {
@@ -373,73 +386,72 @@ static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t Buff
 #else /* MASTER_BOARD */
 
 /**
-  * @brief  主机处理函数
-  * @param  无
-  * @retval 无
+  * @brief  I2C(as master) handling program
+  * @param  None
+  * @retval None
   */
 static void APP_HandleI2cMaster(void)
 {
-  /* (1) 使能 Master 数据接收的应答 ************************/
+  /* (1) Prepare to return a successfully received ACK ************************/
   LL_I2C_AcknowledgeNextData(I2C1, LL_I2C_ACK);
-  
-  /* (2) 向从设备发起启动条件 ***********************/
-   /* Master 生成开始条件 */
+
+  /* (2) Generate START signal ***********************/
+   /* Master Generate START condition */
   LL_I2C_GenerateStartCondition(I2C1);
 
-  /* (3) 循环直到发送起始位（SB 标志置位） ********************/
+  /* (3) Wait for SB bit be set ********************/
   while(!LL_I2C_IsActiveFlag_SB(I2C1))
   {
   }
 
-  /* (4) 发送带有 7 位 从机地址+方向位 */
+  /* (4) Send 7 bit slave adderss + 1 bit R/W bit */
   LL_I2C_TransmitData8(I2C1, SLAVE_OWN_ADDRESS | I2C_REQUEST_WRITE);
 
-  /* (5) 循环直到收到地址应答（ADDR 标志置位）*******/
-  /* 循环直到 ADDR 标志被置位 */
+  /* (5) Loop until a successfully addressed ACK is received (ADDR flag set)*******/
+  /* wait for ADDR bit be set */
   while(!LL_I2C_IsActiveFlag_ADDR(I2C1))
   {
   }
 
-  /* (6) 清除 ADDR 标志并循环直到传输结束 (ubNbDataToTransmit == 0) */
-  /* 清除 ISR 寄存器中的 ADDR 标志值 */
+  /* (6) Clear ADDR flag and loop until transmission completed (ubNbDataToTransmit == 0) */
+  /* clear ADDR flag */
   LL_I2C_ClearFlag_ADDR(I2C1);
 
-  /* 循环直到 TXE 标志被置位 */
+  /* wait for TXE bit be set */
   while(ubNbDataToTransmit > 0)
   {
-    /* (6.1) 发送数据（TXE 标志置位） **********************************/
+    /* (6.1) send data（TXE bit is set） **********************************/
 
-    /* 检查 ISR 寄存器中的 TXE 标志值 */
+    /* Check TxE if is set */
     if(LL_I2C_IsActiveFlag_TXE(I2C1))
     {
-      /* 将数据写入发送数据寄存器。
-       通过向 TXDR 寄存器写入数据清除 TXE 标志 */
+      /* Read data register to clear TxE bit */
       LL_I2C_TransmitData8(I2C1, (*pTransmitBuffer++));
 
       ubNbDataToTransmit--;
     }
   }
 
-  /* (7) 传输结束，数据一致性正在检查到从进程 *****/ 
-  /* 生成停止条件 */
+  /* (7) Transmission completed，the slave is checking data consistency *****/
+  /* Generate STOP signal */
   LL_I2C_GenerateStopCondition(I2C1);
 
-  /* 打开 LED：
-    * - 预期的字节已发送
-    * - 主 Tx 序列成功完成
+  /*turn on LED：
+    * - The expected bytes have been received
+    * - Tx sequence completed successfully
     */
   BSP_LED_On(LED_GREEN);
 }
 #endif /* SLAVE_BOARD */
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  Error handling function
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* Infinite loop */
   while (1)
   {
   }
@@ -447,16 +459,17 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file：Pointer to the source file name
+  * @param  line：assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add His own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* Infinite loop */
   while (1)
   {
   }

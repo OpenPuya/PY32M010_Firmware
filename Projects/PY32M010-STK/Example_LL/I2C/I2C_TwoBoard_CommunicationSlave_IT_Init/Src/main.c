@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -25,11 +33,11 @@
 #include "py32m010xx_ll_Start_Kit.h"
 
 /* Private define ------------------------------------------------------------*/
-#define I2C_ADDRESS        0xA0     /* 本机\从机地址 */
-#define I2C_SPEEDCLOCK     100000   /* 通讯速度100K */
-#define I2C_STATE_READY    0        /* 就绪状态 */
-#define I2C_STATE_BUSY_TX  1        /* 发送状态 */
-#define I2C_STATE_BUSY_RX  2        /* 接收状态 */
+#define I2C_ADDRESS        0xA0     /* Master\Slave Address */
+#define I2C_SPEEDCLOCK     100000   /* Communication frequency:100K */
+#define I2C_STATE_READY    0        /* Ready state */
+#define I2C_STATE_BUSY_TX  1        /* Send state */
+#define I2C_STATE_BUSY_RX  2        /* Receive state */
 
 /* Private variables ---------------------------------------------------------*/
 uint8_t aTxBuffer[15] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
@@ -51,87 +59,89 @@ static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t Buff
 static void APP_LedBlinking(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure Systemclock */
   APP_SystemClockConfig();
-  
-  /* 初始化LED */
+
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
-  
-  /* 配置I2C */
+
+  /* Configure I2C */
   APP_ConfigI2cSlave();
-  
-  /* 从机接收数据 */
+
+  /* Slave receive data */
   APP_SlaveReceive_IT((uint8_t *)aRxBuffer, sizeof(aRxBuffer));
-  
-  /* 等待从机接收数据完成 */
+
+  /* Wait for the slave to finish seceive data */
   while (State != I2C_STATE_READY);
-  
-  /* 从机发送数据 */
+
+  /* slave send data */
   APP_SlaveTransmit_IT((uint8_t *)aTxBuffer, sizeof(aTxBuffer));
-  
-  /* 等待从机发送数据完成 */
+
+  /* Wait for the slave to finish sending data */
   while (State != I2C_STATE_READY);
-  
-  /* 检查接收到的数据 */
+
+  /* Check received data */
   APP_CheckEndOfTransfer();
-  
+
   while (1)
   {
   }
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure Systemclock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB divider: HCLK = SYSCLK */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* HSISYS used as SYSCLK clock source  */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 divider */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(24000000);
 }
 
 /**
-  * @brief  I2C配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure I2C peripheral
+  * @param  None
+  * @retval None
   */
 static void APP_ConfigI2cSlave(void)
 {
-  /* 使能 GPIOB 的外设时钟 */
+  /* Enabel GPIOB clock */
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOB);
 
-  /* 启用 I2C1 的外设时钟 */
+  /* Enabke I2C1 peripheral clock */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
 
-  /* 将 SCL 引脚配置为：可选功能、高速、开漏、上拉 */
+  /* Set PB3 to SCL pin , Select alternate function mode
+     and fast output speed. output type is Selected open-drain,
+     Enable I/O pull up*/
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-  
+
   GPIO_InitStruct.Pin = LL_GPIO_PIN_3;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
@@ -140,7 +150,9 @@ static void APP_ConfigI2cSlave(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_6;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* 将 SDA 引脚配置为：可选功能、高速、开漏、上拉 */
+  /* Set PB4 to SDA pin , Select alternate function mode
+     and fast output speed. output type is Selected open-drain,
+     Enable I/O pull up*/
   GPIO_InitStruct.Pin = LL_GPIO_PIN_4;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
@@ -148,95 +160,95 @@ static void APP_ConfigI2cSlave(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
   GPIO_InitStruct.Alternate = LL_GPIO_AF_6;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-  
-  /* 复位I2C */
+
+  /* Reset I2C peripheral */
   LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_I2C1);
   LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_I2C1);
-  
-  /* 使能NVIC中断 */
+
+  /* Enable I2C Peripheral interruption request */
   NVIC_SetPriority(I2C1_IRQn, 0);
   NVIC_EnableIRQ(I2C1_IRQn);
-  
-  /* I2C初始化 */
-  LL_I2C_InitTypeDef I2C_InitStruct;
+
+  /* Initialize I2C1 peripheral */
+  LL_I2C_InitTypeDef I2C_InitStruct = {0};
   I2C_InitStruct.ClockSpeed      = I2C_SPEEDCLOCK;
   I2C_InitStruct.DutyCycle       = LL_I2C_DUTYCYCLE_16_9;
   I2C_InitStruct.OwnAddress1     = I2C_ADDRESS;
   I2C_InitStruct.TypeAcknowledge = LL_I2C_NACK;
   LL_I2C_Init(I2C1, &I2C_InitStruct);
-  
-  /* 启用时钟拉伸 */
-  /* 复位值是启用时钟延长 */
+
+  /* Enable clock stretching */
+  /* Reset value is clock stretching enabled */
   /* LL_I2C_EnableClockStretching(I2C1); */
-  
-  /* 启用广播呼叫 */
-  /* 复位值为禁用广播呼叫 */
+
+  /* Enable general call  */
+  /* Reset value is general call disabled */
   /* LL_I2C_EnableGeneralCall(I2C1); */
 }
 
 /**
-  * @brief  I2C发送函数
-  * @param  pData：要发送数据指针
-  * @param  Size：要发送数据大小
-  * @retval 无
+  * @brief  I2C Send data with interrupt
+  * @param  pData：pData pointer to Send buffer
+  * @param  Size：Size Amount of data to be sent
+  * @retval None
   */
 static void APP_SlaveTransmit_IT(uint8_t *pData, uint16_t Size)
 {
-  /* 清pos */
+  /* Clear pos bit */
   LL_I2C_DisableBitPOS(I2C1);
-  
-  /*要发送数据、数据大小、状态赋给全局变量 */
+
+  /* Update data to be sent, data size, and status to global variables */
   pBuffPtr    = pData;
   XferCount   = Size;
   State       = I2C_STATE_BUSY_TX;
-  
-  /* 使能应答 */
+
+  /* Prepare the generation of a ACKnowledge condition */
   LL_I2C_AcknowledgeNextData(I2C1, LL_I2C_ACK);
-  
-  /* 使能中断 */
+
+  /* Enable event interrupt、buffer interrupt and error interrupt */
   LL_I2C_EnableIT_EVT(I2C1);
   LL_I2C_EnableIT_BUF(I2C1);
   LL_I2C_EnableIT_ERR(I2C1);
 }
 
 /**
-  * @brief  I2C接收函数
-  * @param  pData：要接收数据指针
-  * @param  Size：要接收数据大小
-  * @retval 无
+  * @brief  I2C receive data with interrupt
+  * @param  pData：pData pointer to receive buffer
+  * @param  Size：Size Amount of data to be received
+  * @retval None
   */
 static void APP_SlaveReceive_IT(uint8_t *pData, uint16_t Size)
 {
-  /* 清pos */
+  /* clear pos bit */
   LL_I2C_DisableBitPOS(I2C1);
-  
-  /* 要发送数据、数据大小赋给全局变量 */
+
+  /* Update data to be received, data size, and status to global variables */
   pBuffPtr    = pData;
   XferCount   = Size;
   State       = I2C_STATE_BUSY_RX;
-  
-  /* 使能应答 */
+
+  /* Prepare the generation of a ACKnowledge condition */
   LL_I2C_AcknowledgeNextData(I2C1, LL_I2C_ACK);
-  
-  /* 使能中断 */
+
+  /* Enable event interrupt、buffer interrupt and error interrupt */
   LL_I2C_EnableIT_EVT(I2C1);
   LL_I2C_EnableIT_BUF(I2C1);
   LL_I2C_EnableIT_ERR(I2C1);
 }
 
 /**
-  * @brief  I2C中断回调函数
-  * @param  无
-  * @retval 无
+  * @brief  I2C interruption callback
+  * @param  None
+  * @retval None
   */
 void APP_SlaveIRQCallback(void)
 {
-  /* ADDR标志位置位 */
+  /* Check if ADDR bit is set */
   if ((LL_I2C_IsActiveFlag_ADDR(I2C1) == 1) && (LL_I2C_IsEnabledIT_EVT(I2C1) == 1))
   {
     LL_I2C_ClearFlag_ADDR(I2C1);
   }
-  /* STOPF 标志位置位 */
+  /* Check if STOPF bit is set */
   else if (LL_I2C_IsActiveFlag_STOP(I2C1) == 1)
   {
     if ((XferCount == 0) && (State == I2C_STATE_BUSY_TX))
@@ -250,12 +262,12 @@ void APP_SlaveIRQCallback(void)
       LL_I2C_DisableIT_BUF(I2C1);
       LL_I2C_DisableIT_ERR(I2C1);
     }
-    
+
     LL_I2C_ClearFlag_STOP(I2C1);
-    
+
     LL_I2C_AcknowledgeNextData(I2C1, LL_I2C_NACK);
-    
-    /* 数据未全部接收，接收数据失败 */
+
+    /* Not all data received,data receiving failure */
     if (XferCount != 0U)
     {
       if ((LL_I2C_IsActiveFlag_BTF(I2C1) == 1))
@@ -264,7 +276,7 @@ void APP_SlaveIRQCallback(void)
         pBuffPtr++;
         XferCount--;
       }
-      
+
       if ((LL_I2C_IsActiveFlag_RXNE(I2C1) == 1))
       {
         *pBuffPtr = LL_I2C_ReceiveData8(I2C1);
@@ -273,19 +285,19 @@ void APP_SlaveIRQCallback(void)
       }
       if (XferCount != 0U)
       {
-        /*  数据接收失败处理 */
+        /* Data receiving failure handle */
       }
     }
-    
+
     if (State == I2C_STATE_BUSY_RX)
     {
        State = I2C_STATE_READY;
     }
   }
-  /* 从机发送 */
+  /* slave send data mode */
   else if (State == I2C_STATE_BUSY_TX)
   {
-    /* TXE标志位置位，BTF标志位未置位 */
+    /* Check if TxE bit is set and BTF bit is clear */
     if ((LL_I2C_IsActiveFlag_TXE(I2C1) == 1) && (LL_I2C_IsEnabledIT_BUF(I2C1) == 1) && (LL_I2C_IsActiveFlag_BTF(I2C1) == 0))
     {
       if (XferCount != 0)
@@ -295,7 +307,7 @@ void APP_SlaveIRQCallback(void)
         XferCount--;
       }
     }
-    /* BTF标志位置位 */
+    /* Check if BTF bit is set */
     else if ((LL_I2C_IsActiveFlag_BTF(I2C1) == 1) && (LL_I2C_IsEnabledIT_EVT(I2C1) == 1))
     {
       if (XferCount != 0)
@@ -306,10 +318,10 @@ void APP_SlaveIRQCallback(void)
       }
     }
   }
-  /* 从机接收 */
+  /* slave receive data mode */
   else
   {
-    /* RXNE标志位置位，BTF标志位未置位 */
+    /* Check if RxNE bit is set and BTF bit is clear */
     if ((LL_I2C_IsActiveFlag_RXNE(I2C1) == 1) && (LL_I2C_IsEnabledIT_BUF(I2C1) == 1) && (LL_I2C_IsActiveFlag_BTF(I2C1) == 0))
     {
       if (XferCount != 0U)
@@ -319,7 +331,7 @@ void APP_SlaveIRQCallback(void)
         XferCount--;
       }
     }
-    /* BTF标志位置位 */
+    /* check if BTF is set */
     else if ((LL_I2C_IsActiveFlag_BTF(I2C1) == 1) && (LL_I2C_IsEnabledIT_EVT(I2C1) == 1))
     {
       if (XferCount != 0U)
@@ -333,9 +345,11 @@ void APP_SlaveIRQCallback(void)
 }
 
 /**
-  * @brief  I2C主机接收完最后一字节后，向从机发送NACK，从机NACK中断回调函数
-  * @param  无
-  * @retval 无
+  * @brief  When the I2C host receives the last byte to send the NACK,
+  *         the interrupt callback function is called when the I2C slave
+  *         receives the NACK
+  * @param  None
+  * @retval None
   */
 void APP_SlaveIRQCallback_NACK(void)
 {
@@ -346,42 +360,42 @@ void APP_SlaveIRQCallback_NACK(void)
       LL_I2C_DisableIT_EVT(I2C1);
       LL_I2C_DisableIT_BUF(I2C1);
       LL_I2C_DisableIT_ERR(I2C1);
-      
+
       LL_I2C_ClearFlag_AF(I2C1);
-      
+
       LL_I2C_AcknowledgeNextData(I2C1, LL_I2C_NACK);
-      
+
       State = I2C_STATE_READY;
     }
   }
 }
 
 /**
-  * @brief  校验数据函数
-  * @param  无
-  * @retval 无
+  * @brief  Compare sent and received data
+  * @param  None
+  * @retval None
   */
 static void APP_CheckEndOfTransfer(void)
 {
-  /* 比较发送数据和接收数据 */
+  /* Compare sent data and received data */
   if(APP_Buffercmp8((uint8_t*)aTxBuffer, (uint8_t*)aRxBuffer, sizeof(aRxBuffer)))
   {
-    /* 错误处理 */
+    /* Error handle */
     APP_LedBlinking();
   }
   else
   {
-    /* 如果数据接收到，则打开 LED */
+    /* if data received successfully, turn on the LED */
     BSP_LED_On(LED_GREEN);
   }
 }
 
 /**
-  * @brief  字符比较函数
-  * @param  pBuffer1：待比较缓冲区1
-  * @param  pBuffer2：待比较缓冲区2
-  * @param  BufferLength：待比较字符的个数
-  * @retval 0：比较值相同；1：比较值不同
+  * @brief  Character Comparison function
+  * @param  pBuffer1：pBuffer1 pointer to buffer1
+  * @param  pBuffer2：pBuffer1 pointer to buffer2
+  * @param  BufferLength：The number of characters to be compared
+  * @retval 0：The contents of buffer1 are equal to buffer2. 1: The contents of buffer1 are not equal to buffer2
   */
 static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t BufferLength)
 {
@@ -399,9 +413,9 @@ static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t Buff
 }
 
 /**
-  * @brief  LED灯闪烁
-  * @param  无
-  * @retval 无
+  * @brief  LED blinking
+  * @param  None
+  * @retval None
   */
 static void APP_LedBlinking(void)
 {
@@ -413,13 +427,13 @@ static void APP_LedBlinking(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  Error handling function
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* Infinite loop */
   while (1)
   {
   }
@@ -427,16 +441,17 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file：Pointer to the source file name
+  * @param  line：assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add His own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* Infinite loop */
   while (1)
   {
   }

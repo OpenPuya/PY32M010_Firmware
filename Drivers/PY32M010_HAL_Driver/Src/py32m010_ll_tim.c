@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -267,8 +275,8 @@ ErrorStatus LL_TIM_DeInit(TIM_TypeDef *TIMx)
 #if defined(TIM14)
   else if (TIMx == TIM14)
   {
-    LL_APB1_GRP1_ForceReset(LL_APB1_GRP2_PERIPH_TIM14);
-    LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP2_PERIPH_TIM14);
+    LL_APB1_GRP2_ForceReset(LL_APB1_GRP2_PERIPH_TIM14);
+    LL_APB1_GRP2_ReleaseReset(LL_APB1_GRP2_PERIPH_TIM14);
   }
 #endif
 #if defined(TIM15)
@@ -737,6 +745,7 @@ ErrorStatus LL_TIM_BDTR_Init(TIM_TypeDef *TIMx, LL_TIM_BDTR_InitTypeDef *TIM_BDT
   * @}
   */
 
+/* Private functions --------------------------------------------------------*/
 /** @addtogroup TIM_LL_Private_Functions TIM Private Functions
   *  @brief   Private functions
   * @{

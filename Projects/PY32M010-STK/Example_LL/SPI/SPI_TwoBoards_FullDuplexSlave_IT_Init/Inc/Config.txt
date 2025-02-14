@@ -1,0 +1,14 @@
+[FilePath]
+0=../../../../../../Drivers/PY32M010_HAL_Driver/Src/py32m010_ll_utils.c
+1=../../../../../../Drivers/PY32M010_HAL_Driver/Src/py32m010_ll_spi.c
+2=../../../../../../Drivers/PY32M010_HAL_Driver/Src/py32m010_ll_gpio.c
+[FileName]
+0=py32m010_ll_utils.c
+1=py32m010_ll_spi.c
+2=py32m010_ll_gpio.c
+[Define]
+0=PY32M010x5
+1=USE_FULL_LL_DRIVER
+[User]
+0=../Src/main.c
+1=../Src/py32m010_it.c

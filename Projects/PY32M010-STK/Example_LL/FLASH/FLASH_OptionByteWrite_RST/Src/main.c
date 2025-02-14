@@ -7,8 +7,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -25,8 +33,8 @@
 #include "main.h"
 
 /* Private define ------------------------------------------------------------*/
-#define MODE_PC0 OB_SWD_PB6_GPIO_PC0
-//#define MODE_PC0 OB_SWD_PB6_NRST_PC0
+#define OB_GPIO_PIN_MODE OB_SWD_PB6_GPIO_PC0
+/* #define OB_GPIO_PIN_MODE OB_SWD_PB6_NRST_PC0 */
 
 
 /* Private variables ---------------------------------------------------------*/
@@ -37,22 +45,26 @@
 static void APP_FlashOBProgram(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  HAL_Init();                                         /* 初始化systick */
-  
-  /* 初始化LED */  
+  /* Initialize SysTick */
+  HAL_Init();
+
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
+
+  /* Initialize BUTTON */
+  BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
   
-  /* 初始化按键BUTTON */
-  BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);  
-   
-  if(READ_BIT(FLASH->OPTR, OB_USER_SWD_NRST_MODE)!= MODE_PC0 )
+  /* Wait For Button */
+  while(BSP_PB_GetState(BUTTON_KEY) == 1);
+
+  if(READ_BIT(FLASH->OPTR, OB_USER_SWD_NRST_MODE)!= OB_GPIO_PIN_MODE )
   {
-    /* 写OPTION */
+    /* Option byte program */
     APP_FlashOBProgram();
   }
   else
@@ -66,40 +78,45 @@ int main(void)
 }
 
 /**
-  * @brief  写option空间函数
-  * @param  无
-  * @retval 无
+  * @brief  Option byte program
+  * @param  None
+  * @retval None
   */
 static void APP_FlashOBProgram(void)
 {
-  FLASH_OBProgramInitTypeDef OBInitCfg;
+  FLASH_OBProgramInitTypeDef OBInitCfg = {0};
 
-  HAL_FLASH_Unlock();        /* 解锁FLASH */
-  HAL_FLASH_OB_Unlock();     /* 解锁OPTION */
-  
+  /* Unlock the Flash to enable the flash control register access */
+  HAL_FLASH_Unlock();
+
+  /* Unlock the Flash to enable access to the part of flash control register that is about option byte */
+  HAL_FLASH_OB_Unlock();
+
+  /* Initialize FLASH Option Bytes PROGRAM structure */
   OBInitCfg.OptionType = OPTIONBYTE_USER;
-  OBInitCfg.USERType = OB_USER_BOR_EN | OB_USER_BOR_LEV | OB_USER_IWDG_SW | OB_USER_IWDG_STOP | OB_USER_SWD_NRST_MODE;
-
-  OBInitCfg.USERConfig = OB_BOR_DISABLE | OB_BOR_LEVEL_3p1_3p2 | OB_IWDG_SW | OB_IWDG_STOP_ACTIVE | MODE_PC0 ;
-
-  /* 启动option byte编程 */
+  OBInitCfg.USERType = OB_USER_BOR_EN | OB_USER_BOR_LEV | OB_USER_IWDG_SW | OB_USER_SWD_NRST_MODE;
+  OBInitCfg.USERConfig = OB_BOR_DISABLE | OB_BOR_LEVEL_3p1_3p2 | OB_IWDG_SW | OB_GPIO_PIN_MODE;
+  /* Execute option byte program */
   HAL_FLASH_OBProgram(&OBInitCfg);
 
-  HAL_FLASH_Lock();      /* 锁定FLASH */
-  HAL_FLASH_OB_Lock();   /* 锁定OPTION */
+  /* Lock the Flash to disable the flash control register access */
+  HAL_FLASH_Lock();
 
-  /* 产生一个复位，option byte装载 */
+  /* Lock the Flash to disable access to the part of flash control register that is about option byte */
+  HAL_FLASH_OB_Lock();
+
+  /* Generate a reset and let option byte reload */
   HAL_FLASH_OB_Launch();
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  Error handling function
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* Infinite loop */
   while (1)
   {
   }
@@ -107,16 +124,17 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file：Pointer to the source file name
+  * @param  line：assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add His own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* Infinite loop */
   while (1)
   {
   }

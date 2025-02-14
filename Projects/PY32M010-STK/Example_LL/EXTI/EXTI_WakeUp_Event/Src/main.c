@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -34,130 +42,131 @@ static void APP_ExtiConfig(void);
 static void APP_EnterStop(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 开SYSCFG和PWR时钟 */
+  /* Enable SYSCFG clock and PWR clock */
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_SYSCFG);
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
-  
-  /* 配置系统时钟 */
+
+  /* Configure Systemclock */
   APP_SystemClockConfig();
 
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
-  
-  /* 初始化按键BUTTON */
+
+  /* Initialize Button */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
 
-  /* 配置EXTI */
+  /* Configure EXTI6 (connected to PA6 pin) in event mode */
   APP_ExtiConfig();
-  
-  /* 点亮小灯 */
+
+  /* LED on */
   BSP_LED_On(LED_GREEN);
-  
-  /* 等待用户按键按下，主机程序开始运行 */
+
+  /* Wait for the user to press the key, the program starts to run */
   while (BSP_PB_GetState(BUTTON_KEY) == 1)
   {
   }
-  
-  /* 关闭小灯 */
+
+  /* LED off */
   BSP_LED_Off(LED_GREEN);
 
-  /* 进入Stop模式，等待PA6引脚下降沿触发，事件唤醒 */
+  /* Enter Stop mode and wait for the PA6 pin falling edge to trigger wake up event */
   APP_EnterStop();
 
   while (1)
   {
-    /* LED灯翻转 */
+    /* LED toggle */
     BSP_LED_Toggle(LED_GREEN);
-    /* 延时500ms */
+    /* Delay 500ms */
     LL_mDelay(500);
   }
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure Systemclock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB divider: HCLK = SYSCLK */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* HSISYS used as SYSCLK clock source  */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 divider */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(24000000);
 }
 
 /**
-  * @brief  EXTI配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure EXTI6 (connected to PA6 pin) in event mode
+  * @param  None
+  * @retval None
   */
 static void APP_ExtiConfig(void)
 {
-  /* 使能GPIOA */
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+  LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
+  
+  /* Enable GPIOA clock */
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
 
-  /* 配置输入模式 */
-  LL_GPIO_InitTypeDef GPIO_InitStruct;
+  /* Configure PA6 as input mode */
   GPIO_InitStruct.Pin = LL_GPIO_PIN_6;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /* 配置EXTI为事件、下降沿触发 */
-  LL_EXTI_InitTypeDef EXTI_InitStruct;
+  /* Set EXTI6 to event patterns, falling edge trigger */
   EXTI_InitStruct.Line = LL_EXTI_LINE_6;
   EXTI_InitStruct.LineCommand = ENABLE;
   EXTI_InitStruct.Mode = LL_EXTI_MODE_EVENT;
   EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_FALLING;
   LL_EXTI_Init(&EXTI_InitStruct);
-  
-  /* 当使用EXTI通道为0~8时需要配置触发端口 */
+
+  /* Set EXTI6 to connected to PA6 pin(Trigger ports need to be configured when using EXTI line0~8) */
   LL_EXTI_SetEXTISource(LL_EXTI_CONFIG_PORTA,LL_EXTI_CONFIG_LINE6);
 }
 
 /**
-  * @brief  进入Stop模式
-  * @param  无
-  * @retval 无
+  * @brief  Enter Stop mode
+  * @param  None
+  * @retval None
   */
 static void APP_EnterStop(void)
 {
-  /* 使能PWR时钟 */
+  /* Enable PWR clock */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
-  /* 低功耗运行模式 */
+  /* STOP mode with Deep low power regulator ON */
   LL_PWR_SetLprMode(LL_PWR_LPR_MODE_LPR);
-  
-  /* SRAM电压跟数字LDO输出一致 */
+
+  /* SRAM retention voltage aligned with digital LDO output */
   LL_PWR_SetStopModeSramVoltCtrl(LL_PWR_SRAM_RETENTION_VOLT_CTRL_LDO);
-  
-  /* 进入DeepSleep模式 */
+
+  /* Enter DeepSleep mode */
   LL_LPM_EnableDeepSleep();
-  
-  /* 等待中断指令 */
+
+  /* Request Wait For event */
   __SEV();
   __WFE();
   __WFE();
@@ -166,13 +175,13 @@ static void APP_EnterStop(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  Error handling function
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* Infinite loop */
   while (1)
   {
   }
@@ -180,16 +189,17 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file：Pointer to the source file name
+  * @param  line：assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add His own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* Infinite loop */
   while (1)
   {
   }

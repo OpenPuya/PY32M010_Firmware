@@ -2,15 +2,23 @@
   ******************************************************************************
   * @file    py32m010_hal_def.h
   * @author  MCU Application Team
-  * @Version V1.0.0
-  * @Date
+  * @version V1.0.0
+  * @date
   * @brief   This file contains HAL common defines, enumeration, macros and
   *          structures definitions.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -65,14 +73,6 @@ typedef enum
 
 #define HAL_IS_BIT_SET(REG, BIT)         (((REG) & (BIT)) != 0U)
 #define HAL_IS_BIT_CLR(REG, BIT)         (((REG) & (BIT)) == 0U)
-
-#if (defined(DMA) || defined(DMA1))
-#define __HAL_LINKDMA(__HANDLE__, __PPP_DMA_FIELD__, __DMA_HANDLE__)               \
-                        do{                                                      \
-                              (__HANDLE__)->__PPP_DMA_FIELD__ = &(__DMA_HANDLE__); \
-                              (__DMA_HANDLE__).Parent = (__HANDLE__);             \
-                          } while(0U)
-#endif
 
 #define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
 

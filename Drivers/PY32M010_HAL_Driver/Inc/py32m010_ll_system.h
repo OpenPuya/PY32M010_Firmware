@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -71,7 +79,7 @@ extern "C" {
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EC_I2C_FMP I2C FAST MODE ENABLE CONTORL
+/** @defgroup SYSTEM_LL_EC_I2C_FMP SYSCFG I2C FAST MODE ENABLE CONTORL
   * @{
   */
 #define LL_SYSCFG_I2C_FMP_PA2                SYSCFG_CFGR1_I2C_PA2_FMP
@@ -82,7 +90,7 @@ extern "C" {
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EC_OCREF_CLR TIMER OCREF CLEAR INPUT
+/** @defgroup SYSTEM_LL_EC_OCREF_CLR SYSCFG TIMER OCREF CLEAR INPUT
   * @{
   */
 #define LL_SYSCFG_OCREF_CLR_COMP1_TO_TIM1      SYSCFG_CFGR1_COMP1_OCREF_CLR_TIM1
@@ -91,7 +99,8 @@ extern "C" {
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EC_CH1_SRC ETR SOURCE
+/** @defgroup SYSTEM_LL_EC_CH1_SRC SYSCFG TIM1 CH1 SRC
+  * @{
   */
 #define LL_SYSCFG_CH1_SRC_TIM1_GPIO          0x00000000U
 #if defined(COMP1)
@@ -104,7 +113,7 @@ extern "C" {
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EC_TIMBREAK TIMER BREAK INPUT
+/** @defgroup SYSTEM_LL_EC_TIMBREAK SYSCFG TIMER BREAK INPUT
   * @{
   */
 #if defined(SYSCFG_CFGR2_LOCKUP_LOCK)
@@ -120,7 +129,8 @@ extern "C" {
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EC_ETR_SRC ETR SOURCE
+/** @defgroup SYSTEM_LL_EC_ETR_SRC SYSCFG TIM1 ETR SOURCE
+  * @{
   */
 #define LL_SYSCFG_ETR_SRC_TIM1_GPIO          0x00000000U
 #if defined(COMP1)
@@ -136,7 +146,7 @@ extern "C" {
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EC_GPIO_PORT
+/** @defgroup SYSTEM_LL_EC_GPIO_PORT SYSCFG GPIO PORT
   * @{
   */
 #define LL_SYSCFG_GPIO_PORTA              0x00000000U
@@ -146,7 +156,7 @@ extern "C" {
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EC_GPIO_PIN 
+/** @defgroup SYSTEM_LL_EC_GPIO_PIN SYSCFG GPIO PIN
   * @{
   */
 #define LL_SYSCFG_GPIO_PIN_0              0x00000001U
@@ -174,17 +184,8 @@ extern "C" {
 /** @defgroup SYSTEM_LL_EC_APB1_GRP1_STOP_IP  DBGMCU APB1 GRP1 STOP IP
   * @{
   */
-#if defined(DBGMCU_APB_FZ1_DBG_TIM3_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM3_STOP      DBGMCU_APB_FZ1_DBG_TIM3_STOP        /*!< TIM3 counter stopped when core is halted */
-#endif
-#if defined(DBGMCU_APB_FZ1_DBG_TIM6_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM6_STOP      DBGMCU_APB_FZ1_DBG_TIM6_STOP        /*!< TIM6 counter stopped when core is halted */
-#endif
 #if defined(DBGMCU_APB_FZ1_DBG_IWDG_STOP)
 #define LL_DBGMCU_APB1_GRP1_IWDG_STOP      DBGMCU_APB_FZ1_DBG_IWDG_STOP        /*!< Debug Independent Watchdog stopped when Core is halted */
-#endif
-#if defined(DBGMCU_APB_FZ1_DBG_I2C1_STOP)
-#define LL_DBGMCU_APB1_GRP1_I2C1_STOP      DBGMCU_APB_FZ1_DBG_I2C1_STOP        /*!< I2C1 stopped when Core is halted */
 #endif
 #if defined(DBGMCU_APB_FZ1_DBG_LPTIM_STOP)
 #define LL_DBGMCU_APB1_GRP1_LPTIM1_STOP    DBGMCU_APB_FZ1_DBG_LPTIM_STOP      /*!< LPTIM1 counter stopped when Core is halted */
@@ -193,7 +194,7 @@ extern "C" {
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EC_APB2_GRP1_STOP_IP DBGMCU APB2 GRP1 STOP IP
+/** @defgroup SYSTEM_LL_EC_APB1_GRP2_STOP_IP DBGMCU APB1 GRP2 STOP IP
   * @{
   */
 #if defined(DBGMCU_APB_FZ2_DBG_TIM1_STOP)
@@ -201,12 +202,6 @@ extern "C" {
 #endif
 #if defined(DBGMCU_APB_FZ2_DBG_TIM14_STOP)
 #define LL_DBGMCU_APB1_GRP2_TIM14_STOP     DBGMCU_APB_FZ2_DBG_TIM14_STOP       /*!< TIM14 counter stopped when core is halted */
-#endif
-#if defined(DBGMCU_APB_FZ2_DBG_TIM16_STOP)
-#define LL_DBGMCU_APB1_GRP2_TIM16_STOP     DBGMCU_APB_FZ2_DBG_TIM16_STOP       /*!< TIM16 counter stopped when core is halted */
-#endif
-#if defined(DBGMCU_APB_FZ2_DBG_TIM17_STOP)
-#define LL_DBGMCU_APB1_GRP2_TIM17_STOP     DBGMCU_APB_FZ2_DBG_TIM17_STOP       /*!< TIM17 counter stopped when core is halted */
 #endif
 /**
   * @}
@@ -383,7 +378,7 @@ __STATIC_INLINE uint32_t LL_SYSCFG_GetTIM1ETRSource(void)
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EF_GPIO_ENS 
+/** @defgroup SYSTEM_LL_EF_GPIO_ENS   GPIO Filter
   * @{
   */
 /**
@@ -437,7 +432,7 @@ __STATIC_INLINE void LL_SYSCFG_DisableGPIOFilter(uint32_t GPIOPort, uint32_t GPI
   * @}
   */
 
-/** @defgroup SYSTEM_LL_EF_FLASH FLASH
+/** @defgroup SYSTEM_LL_EF_FLASH FLASH Latency
   * @{
   */
 
@@ -465,19 +460,18 @@ __STATIC_INLINE uint32_t LL_FLASH_GetLatency(void)
 {
   return (uint32_t)(READ_BIT(FLASH->ACR, FLASH_ACR_LATENCY));
 }
-
 /**
   * @}
   */
 
-/**
-  * @}
-  */
 
+/** @defgroup SYSTEM_LL_EF_DBGMCU DBGMCU
+  * @{
+  */
 
 /**
   * @brief  Return the device identifier
-  * @retval Values between Min_Data=0x00 and Max_Data=0xFFF
+  * @retval Values between Min_Data=0x00 and Max_Data=0x03
   */
 __STATIC_INLINE uint32_t LL_DBGMCU_GetDeviceID(void)
 {
@@ -492,7 +486,6 @@ __STATIC_INLINE uint32_t LL_DBGMCU_GetRevisionID(void)
 {
   return (uint32_t)(READ_BIT(DBGMCU->IDCODE, DBGMCU_IDCODE_REV_ID) >> DBGMCU_IDCODE_REV_ID_Pos);
 }
-
 
 /**
   * @brief  Enable the Debug Module during STOP mode
@@ -520,12 +513,12 @@ __STATIC_INLINE uint32_t LL_DBGMCU_IsEnabledDBGStopMode(void)
 {
   return ((READ_BIT(DBGMCU->CR, DBGMCU_CR_DBG_STOP) == (DBGMCU_CR_DBG_STOP)) ? 1UL : 0UL);
 }
+
 /**
   * @brief  Freeze APB1 peripherals (group1 peripherals)
   * @note   Depending on devices and packages, some Peripherals may not be available.
   *         Refer to device datasheet for Peripherals availability.
   * @param  Periphs This parameter can be a combination of the following values:
-  *         @arg @ref LL_DBGMCU_APB1_GRP1_I2C1_STOP
   *         @arg @ref LL_DBGMCU_APB1_GRP1_IWDG_STOP
   *         @arg @ref LL_DBGMCU_APB1_GRP1_LPTIM1_STOP
   * @retval None
@@ -540,7 +533,6 @@ __STATIC_INLINE void LL_DBGMCU_APB1_GRP1_FreezePeriph(uint32_t Periphs)
   * @note   Depending on devices and packages, some Peripherals may not be available.
   *         Refer to device datasheet for Peripherals availability.
   * @param  Periphs This parameter can be a combination of the following values:
-  *         @arg @ref LL_DBGMCU_APB1_GRP1_I2C1_STOP
   *         @arg @ref LL_DBGMCU_APB1_GRP1_IWDG_STOP
   *         @arg @ref LL_DBGMCU_APB1_GRP1_LPTIM1_STOP
   * @retval None
@@ -555,7 +547,6 @@ __STATIC_INLINE void LL_DBGMCU_APB1_GRP1_UnFreezePeriph(uint32_t Periphs)
   * @note   Depending on devices and packages, some Peripherals may not be available.
   *         Refer to device datasheet for Peripherals availability.
   * @param  Periphs This parameter can be one of the following values:
-  *         @arg @ref LL_DBGMCU_APB1_GRP1_I2C1_STOP
   *         @arg @ref LL_DBGMCU_APB1_GRP1_IWDG_STOP
   *         @arg @ref LL_DBGMCU_APB1_GRP1_LPTIM1_STOP
   * @retval State of bit (1 or 0).
@@ -606,6 +597,15 @@ __STATIC_INLINE uint32_t LL_DBGMCU_APB1_GRP2_IsFreezePeriph(uint32_t Periphs)
 {
   return ((READ_BIT(DBGMCU->APBFZ2, Periphs) == (Periphs)) ? 1UL : 0UL);
 }
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
 /**
   * @}
   */

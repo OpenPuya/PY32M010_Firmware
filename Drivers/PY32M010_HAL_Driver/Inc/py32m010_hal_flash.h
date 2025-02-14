@@ -6,8 +6,16 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) Puya Semiconductor Co.
+  * <h2><center>&copy; Copyright (c) 2023 Puya Semiconductor Co.
   * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by Puya under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  * @attention
   *
   * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
   * All rights reserved.</center></h2>
@@ -128,10 +136,6 @@ typedef struct
   * @{
   */
 
-/**
-  * @}
-  */
-
 /** @defgroup FLASH_Latency FLASH Latency
   * @{
   */
@@ -144,13 +148,21 @@ typedef struct
 /** @defgroup FLASH_Type_Erase FLASH erase type
   * @{
   */
-#define FLASH_TYPEERASE_MASSERASE       (0x01U)  /*!<Flash mass erase activation*/
-#define FLASH_TYPEERASE_PAGEERASE       (0x02U)  /*!<Flash Pages erase activation*/
-#define FLASH_TYPEERASE_SECTORERASE     (0x03U)
+#define FLASH_TYPEERASE_MASSERASE       FLASH_CR_MER  /*!<Flash mass erase activation*/
+#define FLASH_TYPEERASE_PAGEERASE       FLASH_CR_PER  /*!<Flash Pages erase activation*/
+#define FLASH_TYPEERASE_SECTORERASE     FLASH_CR_SER  /*!<Flash sectore erase activation*/
 /**
   * @}
   */
 
+/** @defgroup FLASH_Type_Program FLASH type program
+  * @{
+  */
+#define FLASH_TYPEPROGRAM_PAGE          FLASH_CR_PG  /*!<Program 128bytes at a specified address.*/
+/**
+  * @}
+  */
+  
 /** @defgroup FLASH_Flags FLASH Flags Definition
   * @{
   */
@@ -219,9 +231,7 @@ typedef struct
   * @}
   */
 
-/**
-  * @}
-  */
+
 
 /** @defgroup FLASH_OB_USER_Type FLASH User Option Type
   * @{
@@ -230,22 +240,20 @@ typedef struct
 #define OB_USER_BOR_LEV         FLASH_OPTR_BOR_LEV
 #define OB_USER_IWDG_SW         FLASH_OPTR_IWDG_SW
 #define OB_USER_SWD_NRST_MODE   (FLASH_OPTR_SWD_MODE | FLASH_OPTR_NRST_MODE)
+
+#if defined(FLASH_OPTR_IWDG_STOP)
 #define OB_USER_IWDG_STOP       FLASH_OPTR_IWDG_STOP
 #define OB_USER_ALL             (OB_USER_BOR_EN  | OB_USER_BOR_LEV   | OB_USER_IWDG_SW | \
                                  OB_USER_SWD_NRST_MODE | OB_USER_IWDG_STOP)
+#else
+#define OB_USER_ALL             (OB_USER_BOR_EN  | OB_USER_BOR_LEV   | OB_USER_IWDG_SW | \
+                                 OB_USER_SWD_NRST_MODE)
+#endif
 /**
   * @}
   */
 
-/** @defgroup FLASH_Type_Program FLASH type program
-  * @{
-  */
-#define FLASH_TYPEPROGRAM_PAGE       (0x01U)  /*!<Program 128bytes at a specified address.*/
-/**
-  * @}
-  */
-  
-/** @defgroup FLASH_OB_USER_BOR_ENABLE FLASH Option Bytes BOR Level
+/** @defgroup FLASH_OB_USER_BOR_ENABLE FLASH Option Bytes BOR Enable
   * @{
   */
 #define OB_BOR_DISABLE                  0x00000000U        /*!< BOR Reset set to default */
@@ -294,9 +302,10 @@ typedef struct
 /** @defgroup FLASH_OB_USER_IWDG_STOP FLASH IWDG Counter Freeze in STOP
   * @{
   */
+#if defined(FLASH_OPTR_IWDG_STOP)
 #define OB_IWDG_STOP_FREEZE            0x00000000U  /*!< Freeze IWDG counter in STOP mode */
 #define OB_IWDG_STOP_ACTIVE            ((uint32_t)FLASH_OPTR_IWDG_STOP) /*!< IWDG counter active in STOP mode */
-
+#endif
 /**
   * @}
   */
@@ -432,9 +441,7 @@ typedef struct
   */
 #define __HAL_FLASH_CLEAR_FLAG(__FLAG__)                do {  WRITE_REG(FLASH->SR, (__FLAG__)); \
                                                            } while(0U)
-/**
-  * @}
-  */
+
 
 #define __HAL_FLASH_TIME_REG_SET(__EPPARA0__,__EPPARA1__,__EPPARA2__,__EPPARA3__,__EPPARA4__)           \
                                                         do {                                            \
@@ -470,6 +477,13 @@ typedef struct
                                                                            (*(uint32_t *)(_FlashTimmingParam[tmpreg]+16)));  \
                                                 }                                                                            \
                                               }while(0U)
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
 
 /* Include FLASH HAL Extended module */
 /* Exported variables --------------------------------------------------------*/
