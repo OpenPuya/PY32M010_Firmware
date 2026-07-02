@@ -315,4 +315,4 @@ __STATIC_INLINE uint32_t LL_CPUID_GetRevision(void)
 
 #endif /* __PY32M010_LL_CORTEX_H */
 
-/************************ (C) COPYRIGHT Puya *****END OF FILE****/
+/************************ (C) COPYRIGHT Puya *****END OF FILE******************/

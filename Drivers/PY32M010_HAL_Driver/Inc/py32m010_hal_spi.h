@@ -677,4 +677,4 @@ uint32_t             HAL_SPI_GetError(SPI_HandleTypeDef *hspi);
 
 #endif /* PY32M010_HAL_SPI_H */
 
-/************************ (C) COPYRIGHT Puya *****END OF FILE****/
+/************************ (C) COPYRIGHT Puya *****END OF FILE******************/

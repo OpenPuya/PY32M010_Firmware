@@ -903,4 +903,4 @@ uint32_t              HAL_UART_GetError(UART_HandleTypeDef *huart);
 
 #endif /* __PY32M010_HAL_UART_H */
 
-/************************ (C) COPYRIGHT Puya *****END OF FILE****/
+/************************ (C) COPYRIGHT Puya *****END OF FILE******************/

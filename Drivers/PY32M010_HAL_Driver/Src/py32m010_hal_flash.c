@@ -67,7 +67,7 @@ FLASH_ProcessTypeDef pFlash  = {.Lock = HAL_UNLOCKED, \
 /**
   * @}
   */
-const uint32_t _FlashTimmingParam[8] = {0x1FFF011C, 0x1FFF011C, 0x1FFF011C, 0x1FFF011C, 0x1FFF011C, 0x1FFF0130, 0x1FFF011C, 0x1FFF011C};
+const uint32_t _FlashTimmingParam[8] = {0x1FFF0158, 0x1FFF016C, 0x1FFF011C, 0x1FFF011C, 0x1FFF011C, 0x1FFF0130, 0x1FFF011C, 0x1FFF011C};
 
 /**
   * @brief  Option byte program.
@@ -1043,4 +1043,4 @@ __weak void HAL_FLASH_OperationErrorCallback(uint32_t ReturnValue)
   * @}
   */
 
-/************************ (C) COPYRIGHT Puya *****END OF FILE****/
+/************************ (C) COPYRIGHT Puya *****END OF FILE******************/

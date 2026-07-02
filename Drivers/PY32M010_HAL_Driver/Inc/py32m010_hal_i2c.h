@@ -697,4 +697,4 @@ uint32_t HAL_I2C_GetError(I2C_HandleTypeDef *hi2c);
 
 #endif /* __PY32M010_HAL_I2C_H */
 
-/************************ (C) COPYRIGHT Puya *****END OF FILE****/
+/************************ (C) COPYRIGHT Puya *****END OF FILE******************/

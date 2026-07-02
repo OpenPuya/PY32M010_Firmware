@@ -935,4 +935,4 @@ void        LL_SPI_StructInit(LL_SPI_InitTypeDef *SPI_InitStruct);
 
 #endif /* PY32M010_LL_SPI_H */
 
-/************************ (C) COPYRIGHT Puya *****END OF FILE****/
+/************************ (C) COPYRIGHT Puya *****END OF FILE******************/

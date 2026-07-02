@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    PY32M010_it.h
+  * @file    py32m010_it.h
   * @author  MCU Application Team
   * @brief   This file contains the headers of the interrupt handlers.
   ******************************************************************************
@@ -28,22 +28,19 @@
   ******************************************************************************
   */
 
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __PY32M010_IT_H
 #define __PY32M010_IT_H
 
 #ifdef __cplusplus
- extern "C" {
-#endif 
+extern "C" {
+#endif
 
 /* Private includes ----------------------------------------------------------*/
-
 /* Exported types ------------------------------------------------------------*/
-
 /* Exported constants --------------------------------------------------------*/
-
 /* Exported macro ------------------------------------------------------------*/
-
 /* Exported functions prototypes ---------------------------------------------*/
 void NMI_Handler(void);
 void HardFault_Handler(void);
@@ -57,4 +54,4 @@ void SysTick_Handler(void);
 
 #endif /* __PY32M010_IT_H */
 
-/************************ (C) COPYRIGHT Puya *****END OF FILE****/
+/************************ (C) COPYRIGHT Puya *****END OF FILE******************/
